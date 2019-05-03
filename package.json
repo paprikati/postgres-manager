@@ -1,0 +1,29 @@
+{
+  "name": "postgres-manager",
+  "version": "0.0.1",
+  "description": "creates and manages a pg database",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paprikati/postgres-manager.git"
+  },
+  "keywords": [
+    "postgres",
+    "manager",
+    "node",
+    "easy",
+    "simple"
+  ],
+  "author": "paprikati",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/paprikati/postgres-manager/issues"
+  },
+  "homepage": "https://github.com/paprikati/postgres-manager#readme",
+  "peerDependencies": {
+    "pg": "^7.0.0"
+  }
+}
