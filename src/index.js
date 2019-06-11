@@ -1,11 +1,11 @@
 const DB = require('./db');
 
-function initialise(config){
+function connect(config){
     return new DB(config);
 }
 
 module.exports = {
-    initialise
+    connect
     // checkSchema,
     // fixSchema, // modes 'hard' including deletes and 'soft' with no deletion
 };

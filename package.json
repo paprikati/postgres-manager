@@ -25,5 +25,9 @@
   "homepage": "https://github.com/paprikati/postgres-manager#readme",
   "peerDependencies": {
     "pg": "^7.0.0"
+  },
+  "dependencies": {
+    "pg": "^7.11.0",
+    "pg-format": "^1.0.4"
   }
 }
