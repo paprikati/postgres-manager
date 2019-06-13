@@ -68,5 +68,8 @@ additionally, for arrays:
 };
 ```
 
+Things like insert have two different modes
+1. Naive (do everything as fast as possible) - this is the default. It will not wait for specific calls to be successful (but will ensure all queries pass validation)
+2. Careful (do everything in the 'right' order) - to do.
 
 
