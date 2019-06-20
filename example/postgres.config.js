@@ -1,4 +1,82 @@
 module.exports = {
+    parents: {
+        deleteConfig: {
+            shallow: 'sometimes',
+            hard: 'never', // can be always or sometimes
+            tableId: 'deleted_parents'
+        },
+        columns: {
+            id: {
+                isKey: true,
+                dataType: 'int'},
+            name: {
+                mandatory: true,
+                dataType: 'varchar',
+                maxLength: 30,
+                editable: true
+            }
+        },
+        subTables: [
+            {
+                id: 'children',
+                parentid: 'parentid'
+            }
+        ]
+    },
+    children: {
+        deleteConfig: {
+            tableId: 'deleted_children',
+            columns: ['id', 'parentid', 'name']
+        },
+        columns: {
+            id: {
+                isKey: true,
+                dataType: 'int'
+            },
+            parentid: {
+                dataType: 'int',
+                mandatory: true
+            },
+            name: {
+                mandatory: true,
+                dataType: 'varchar',
+                maxLength: 30,
+                editable: true
+            },
+            gender: {
+                editable: true,
+                dataType: 'boolean'
+            }
+        },
+        subTables: [
+            {
+                id: 'grandchildren',
+                parentid: 'parentid'
+            }
+        ]
+    },
+    grandchildren: {
+        deleteConfig: {
+            hard: 'always',
+            shallow: 'always'
+        },
+        columns: {
+            id: {
+                isKey: true,
+                dataType: 'int'
+            },
+            parentid: {
+                dataType: 'int',
+                mandatory: true
+            },
+            name: {
+                mandatory: true,
+                dataType: 'varchar',
+                maxLength: 30,
+                editable: true
+            }
+        }
+    },
     plans: {
         columns: {
             id: {
@@ -8,15 +86,20 @@ module.exports = {
             title: {
                 mandatory: true,
                 dataType: 'varchar',
-                maxLength: 100
+                maxLength: 100,
+                editable: true
             },
             owner: {
                 mandatory: false,
-                dataType: 'uuid'
+                dataType: 'uuid',
+                editable: true
             }
         },
         subTables: [
-            'meals'
+            {
+                id: 'meals',
+                parentid: 'planid'
+            }
         ],
         indexes: {}
     },
@@ -29,10 +112,11 @@ module.exports = {
             mealtype: {
                 mandatory: true,
                 dataType: 'varchar',
-                maxLength: 30
+                maxLength: 30,
+                editable: true
             },
             planid: {
-                isKey: true,
+                mandatory: true,
                 dataType: 'uuid'
             }
         }
