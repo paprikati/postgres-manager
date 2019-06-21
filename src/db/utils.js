@@ -53,9 +53,28 @@ const getUpdateString = (data, columnsToUpdate, columnConfig) => {
     }).join(', ');
 };
 
+const checkMinMax = (config, val) => {
+    if (config.max && config.max < val){
+        throw new Error(`${val} exceeds max limit ${config.max}`);
+    }
+    if (config.min && config.min < val){
+        throw new Error(`${val} is below min limit ${config.min}`);
+    }
+    return;
+};
+
 const getCellValue = (config, val) =>{
     if (val === undefined){
         return undefined;
+    }
+
+    return validateValue(config, val);
+};
+
+const validateValue = (config, val) => {
+
+    if (config.validator && !config.validator(val)){
+        throw new Error(`${val} failed custom validation function`);
     }
 
     switch (config.dataType){
@@ -64,23 +83,61 @@ const getCellValue = (config, val) =>{
                 throw new Error(`String ${val} is not a valid uuid`);
             }
             return val;
+        case 'text':
+            if (typeof val !== 'string'){
+                throw new Error(`${val} is not a string`);
+            }
+            return val;
         case 'varchar':
+            if (typeof val !== 'string'){
+                throw new Error(`${val} is not a string`);
+            }
             if (val && val.length > config.maxLength){
                 throw new Error(`String ${val} exceeds length limit ${config.maxLength}`);
             }
             return val;
         case 'int':
+            // if val is a string, parseFloat it
+            if (typeof val === 'string'){
+                val = parseFloat(val);
+            }
             // TODO add validation here
+            if (typeof val !== 'number' || !Number.isInteger(val)){
+                throw new Error(`${val} is not a valid integer`);
+            }
+            checkMinMax(config, val);
+            return val;
+        case 'float':
+            if (typeof val === 'string'){
+                val = parseFloat(val);
+            }
+            if (typeof val !== 'number' ){
+                throw new Error(`${val} is not a valid float`);
+            }
+            checkMinMax(config, val);
+            return val;
+        case 'date':
             return val;
         case 'json':
             return JSON.stringify(val);
+        case 'array':
+            // validate each val in the array
+            if (!Array.isArray(val)){
+                throw new Error(`${val} is not a valid array`);
+            }
+            let arrayConf = config.arrayContent;
+            let vals = val.map(ea => {
+                return validateValue(arrayConf, ea);
+            });
+            // make into array syntax for postgres
+            return `{${vals.join(', ')}}`;
         case 'boolean':
             return val;
         default:
             throw new Error(`unsupported data type ${config.dataType}`);
     }
+    return;
 };
-
 
 const getDiff = (existing, incoming) => {
     const existingIds = existing.map(x => x.id);

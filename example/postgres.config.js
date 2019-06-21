@@ -46,6 +46,14 @@ module.exports = {
             gender: {
                 editable: true,
                 dataType: 'boolean'
+            },
+            testarr: {
+                dataType: 'array',
+                arrayContent: {
+                    dataType: 'varchar',
+                    maxLength: 10
+                },
+                editable: true
             }
         },
         subTables: [

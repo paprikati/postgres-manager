@@ -17,6 +17,8 @@ const getInsertQueries = (db, tableId, rows) => {
         for (let colId of columnsList){
             let columnConfig = tableConfig.columns[colId];
             let cellValue = U.getCellValue(columnConfig, row[colId]);
+            console.log('cellvalue');
+            console.log(cellValue);
             if (columnConfig.mandatory && cellValue === undefined){
                 throw new Error(`column ${colId} in table ${tableId} is mandatory`);
             }
@@ -31,6 +33,11 @@ const getInsertQueries = (db, tableId, rows) => {
         tableId,
         columnsList.join(', '),
         values);
+
+    console.log(columnsList);
+
+    console.log('main query');
+    console.log(mainQuery);
 
     let subQueries = [];
     // check if we need to update other tables

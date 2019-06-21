@@ -92,10 +92,10 @@ console.log('hello');
 
 
 // db.insert('parents', getTree(70), callback);
-// db.insert('grandchildren', [{id: 1, name: 'control', parentid: 1000}], callback);
+db.insert('children', [{id: 23, name: 'control', parentid: 1000, testarr: ['a', 'b', 'c']}], callback);
 // db.delete('parents', {_filter: {id: 51}}, callback);
 
-db.deleteById('grandchildren', {ids: [74, 75]}, callback);
+// db.deleteById('grandchildren', {ids: [74, 75]}, callback);
 
 
 // db.updateById('parents', data, callback);
