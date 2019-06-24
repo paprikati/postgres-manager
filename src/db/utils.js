@@ -35,7 +35,6 @@ const getColumnsList = (columns, tableColumns) => {
 };
 
 const getFilterString = _filter => {
-    console.log(_filter);
     let filterString = '';
     if (typeof _filter === 'string') {
         filterString = 'WHERE ' + _filter;
@@ -189,12 +188,8 @@ const naiveWrapper = (parallel, db, queries, cb) => {
     if (!cb) {
         cb = () => {};
     }
-    console.log('all queries');
-    console.log(queries);
     try {
         let _tasks = queries.map(query => {
-            // DEBUG:
-            console.log(query);
             return c1 => {
                 db.pool.query(query, err => {
                     if (err) {
@@ -208,7 +203,6 @@ const naiveWrapper = (parallel, db, queries, cb) => {
         if (parallel) {
             async.parallel(_tasks, cb);
         } else {
-            console.log('running waterfall');
             async.waterfall(_tasks, cb);
         }
     } catch (e) {

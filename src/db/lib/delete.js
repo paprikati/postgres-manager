@@ -96,7 +96,7 @@ const _delete = (db, tableId, options, cb) => {
                     _delete(
                         db,
                         subTable.id,
-                        { _filter, hard: options.hard, shallow: false },
+                        { _filter, hard: isHard, shallow: false },
                         c1
                     );
                 });

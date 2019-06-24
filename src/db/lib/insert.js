@@ -7,9 +7,7 @@ const insert = (db, tableId, rows, callback) => {
         rows = [rows];
     }
 
-    console.log(rows);
     rows = U.addIdsAndInherits(db, tableId, rows);
-    console.log(rows);
 
     // get all our insert queries
     let queries = getInsertQueries(db, tableId, rows);
@@ -54,8 +52,6 @@ const getInsertQueries = (db, tableId, rows) => {
         values
     );
 
-    console.log('checking subtables for table');
-    console.log(tableId);
     let subQueries = [];
     // check if we need to update other tables
     if (tableConfig.subTables) {
@@ -73,9 +69,6 @@ const getInsertQueries = (db, tableId, rows) => {
             }
         });
     }
-    console.log('found subtables:');
-    console.log(subQueries);
-
     return [mainQuery, ...subQueries];
 };
 

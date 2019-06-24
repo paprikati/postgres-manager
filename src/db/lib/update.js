@@ -79,9 +79,6 @@ const updateById = (db, tableId, data, callback) => {
     const _filter = { [keyProp]: id };
     const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
 
-    console.log(query);
-    console.log('running initial query');
-
     pool.query(query, (err, resp) => {
         if (err) {
             callback(err);
@@ -131,8 +128,6 @@ const bulkUpdateById = (db, tableId, rows, cb) => {
 };
 
 const updateSubTable = (subTable, id, newRows, db, cb) => {
-    console.log('updating sub table');
-    console.log(subTable.id);
     const { pool, tables } = db;
     const tableConfig = tables[subTable.id];
     const keyProp = tableConfig.key;
@@ -206,7 +201,6 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
 
         pool.query(query, (error, results) => {
             if (error) {
-                console.log('error in get existing rows');
                 c(error);
             } else {
                 c(undefined, results.rows);
