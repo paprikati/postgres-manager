@@ -1,40 +1,47 @@
 const async = require('async');
 const format = require('pg-format');
+const uuid = require('uuid').v4;
 
 const isGuid = str => {
-    let regex = RegExp(/^(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$/);
+    let regex = RegExp(
+        /^(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$/
+    );
     return regex.test(str);
 };
 
-const indexArr = (arr, prop) => {
+const indexArr = (arr, prop, returnArrs) => {
     const output = {};
     arr.forEach(item => {
         let val = item[prop];
-        if (output[val]){
-            output[val].push(item);
+        if (returnArrs) {
+            if (output[val]) {
+                output[val].push(item);
+            } else {
+                output[val] = [item];
+            }
         } else {
-            output[val] = [item];
+            output[val] = item;
         }
     });
     return output;
 };
 
 const getColumnsList = (columns, tableColumns) => {
-    if (!columns){
+    if (!columns) {
         return '*';
     } else {
         return columns.filter(col => tableColumns[col]).join(', ');
     }
 };
 
-const getFilterString = (_filter) => {
+const getFilterString = _filter => {
     console.log(_filter);
     let filterString = '';
-    if (typeof _filter === 'string'){
+    if (typeof _filter === 'string') {
         filterString = 'WHERE ' + _filter;
     } else if (typeof _filter === 'object') {
         let filterArr = Object.entries(_filter).map(([col, val]) => {
-            if (Array.isArray(val)){
+            if (Array.isArray(val)) {
                 return format('%I IN (%L)', col, val);
             } else {
                 return format('%I = %L', col, val);
@@ -47,72 +54,82 @@ const getFilterString = (_filter) => {
 };
 
 const getUpdateString = (data, columnsToUpdate, columnConfig) => {
-    return Object.keys(data).filter(col => columnsToUpdate.includes(col)).map(col => {
-        let cellValue = getCellValue(columnConfig[col], data[col]);
-        return format('%I = %L', col, cellValue);
-    }).join(', ');
+    return Object.keys(data)
+        .filter(col => columnsToUpdate.includes(col))
+        .map(col => {
+            let cellValue = getCellValue(columnConfig[col], data[col], col);
+            return format('%I = %L', col, cellValue);
+        })
+        .join(', ');
 };
 
 const checkMinMax = (config, val) => {
-    if (config.max && config.max < val){
+    if (config.max && config.max < val) {
         throw new Error(`${val} exceeds max limit ${config.max}`);
     }
-    if (config.min && config.min < val){
+    if (config.min && config.min < val) {
         throw new Error(`${val} is below min limit ${config.min}`);
     }
     return;
 };
 
-const getCellValue = (config, val) =>{
-    if (val === undefined){
-        return undefined;
+const getCellValue = (config, val, colid) => {
+    if ((!config.mandatory && val === undefined) || val === null) {
+        return val;
     }
 
-    return validateValue(config, val);
-};
-
-const validateValue = (config, val) => {
-
-    if (config.validator && !config.validator(val)){
-        throw new Error(`${val} failed custom validation function`);
+    if (config.validator && !config.validator(val)) {
+        throw new Error(
+            `${val} failed custom validation function for column ${colid}`
+        );
     }
 
-    switch (config.dataType){
+    switch (config.dataType) {
         case 'uuid':
-            if (!isGuid(val)){
-                throw new Error(`String ${val} is not a valid uuid`);
+            if (!isGuid(val)) {
+                throw new Error(
+                    `String ${val} is not a valid uuid for column ${colid}`
+                );
             }
             return val;
         case 'text':
-            if (typeof val !== 'string'){
-                throw new Error(`${val} is not a string`);
+            if (typeof val !== 'string') {
+                throw new Error(`${val} is not a string for column ${colid}`);
             }
             return val;
         case 'varchar':
-            if (typeof val !== 'string'){
-                throw new Error(`${val} is not a string`);
+            if (typeof val !== 'string') {
+                throw new Error(`${val} is not a string for column ${colid}`);
             }
-            if (val && val.length > config.maxLength){
-                throw new Error(`String ${val} exceeds length limit ${config.maxLength}`);
+            if (val && val.length > config.maxLength) {
+                throw new Error(
+                    `String ${val} exceeds length limit ${
+                        config.maxLength
+                    } for column ${colid}`
+                );
             }
             return val;
         case 'int':
             // if val is a string, parseFloat it
-            if (typeof val === 'string'){
+            if (typeof val === 'string') {
                 val = parseFloat(val);
             }
             // TODO add validation here
-            if (typeof val !== 'number' || !Number.isInteger(val)){
-                throw new Error(`${val} is not a valid integer`);
+            if (typeof val !== 'number' || !Number.isInteger(val)) {
+                throw new Error(
+                    `${val} is not a valid integer for column ${colid}`
+                );
             }
             checkMinMax(config, val);
             return val;
         case 'float':
-            if (typeof val === 'string'){
+            if (typeof val === 'string') {
                 val = parseFloat(val);
             }
-            if (typeof val !== 'number' ){
-                throw new Error(`${val} is not a valid float`);
+            if (typeof val !== 'number') {
+                throw new Error(
+                    `${val} is not a valid float for column ${colid}`
+                );
             }
             checkMinMax(config, val);
             return val;
@@ -122,19 +139,24 @@ const validateValue = (config, val) => {
             return JSON.stringify(val);
         case 'array':
             // validate each val in the array
-            if (!Array.isArray(val)){
-                throw new Error(`${val} is not a valid array`);
+            if (!Array.isArray(val)) {
+                throw new Error(
+                    `${val} is not a valid array for column ${colid}`
+                );
             }
             let arrayConf = config.arrayContent;
             let vals = val.map(ea => {
-                return validateValue(arrayConf, ea);
+                return getCellValue(arrayConf, ea);
             });
             // make into array syntax for postgres
             return `{${vals.join(', ')}}`;
+        case 'bool':
         case 'boolean':
             return val;
         default:
-            throw new Error(`unsupported data type ${config.dataType}`);
+            throw new Error(
+                `unsupported data type ${config.dataType} for column ${colid}`
+            );
     }
     return;
 };
@@ -164,16 +186,18 @@ const getDiff = (existing, incoming) => {
 };
 
 const naiveWrapper = (parallel, db, queries, cb) => {
-    if (!cb){
+    if (!cb) {
         cb = () => {};
     }
+    console.log('all queries');
+    console.log(queries);
     try {
         let _tasks = queries.map(query => {
             // DEBUG:
-            // console.log(query);
+            console.log(query);
             return c1 => {
                 db.pool.query(query, err => {
-                    if (err){
+                    if (err) {
                         c1(err);
                     } else {
                         c1();
@@ -181,15 +205,85 @@ const naiveWrapper = (parallel, db, queries, cb) => {
                 });
             };
         });
-        if (parallel){
+        if (parallel) {
             async.parallel(_tasks, cb);
         } else {
             console.log('running waterfall');
             async.waterfall(_tasks, cb);
         }
-    } catch (e){
+    } catch (e) {
         cb(e);
     }
 };
 
-module.exports = {isGuid, indexArr, getColumnsList, getFilterString, getUpdateString, getCellValue, getDiff, naiveWrapper};
+const addIdsAndInherits = (db, tableId, rows, inherits) => {
+    let backToObj = false;
+    if (!Array.isArray(rows)) {
+        rows = [rows];
+        backToObj = true;
+    }
+    const tableConfig = db.tables[tableId];
+    const keyProp = tableConfig.key;
+
+    rows = rows.map(row => {
+        // add a uuid as the key if its not present and tableConfig.generateUUID is true
+        if (tableConfig.generateUUID && !row[keyProp]) {
+            row[keyProp] = uuid();
+        }
+        if (inherits) {
+            row = Object.assign(row, inherits);
+        }
+        return row;
+    });
+
+    if (tableConfig.subTables) {
+        // go through subtables and add their ids
+        tableConfig.subTables.forEach(subTable => {
+            rows = rows.map(row => {
+                let inherits = {};
+                inherits[subTable.parentid] = row[keyProp];
+                if (subTable.inherits) {
+                    subTable.inherits.forEach(prop => {
+                        inherits[prop] = row[prop];
+                    });
+                }
+                row[subTable.id] = addIdsAndInherits(
+                    db,
+                    subTable.id,
+                    row[subTable.id],
+                    inherits
+                );
+                return row;
+            });
+        });
+    }
+
+    return backToObj ? rows[0] : rows;
+};
+
+const fixOutputData = (outputData, tableConfig) => {
+    const { sortBy, mapOnRetrieve } = tableConfig;
+
+    if (sortBy) {
+        outputData = outputData.sort((a, b) =>
+            a[sortBy] > b[sortBy] ? 1 : -1
+        );
+    }
+    if (mapOnRetrieve) {
+        outputData = outputData.map(mapOnRetrieve);
+    }
+    return outputData;
+};
+
+module.exports = {
+    addIdsAndInherits,
+    isGuid,
+    indexArr,
+    getColumnsList,
+    getFilterString,
+    getUpdateString,
+    getCellValue,
+    getDiff,
+    naiveWrapper,
+    fixOutputData
+};

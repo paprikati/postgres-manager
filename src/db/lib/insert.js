@@ -1,26 +1,45 @@
 const U = require('../utils');
-const format =  require('pg-format');
+const format = require('pg-format');
+const uuid = require('uuid').v4;
 
-const getInsertQueries = (db, tableId, rows) => {
-
-    const tableConfig = db.tables[tableId];
-    const keyProp = tableConfig.key;
-
-    let columnsList = Object.keys(tableConfig.columns);
-    let values = [];
-    if (!Array.isArray(rows)){
+const insert = (db, tableId, rows, callback) => {
+    if (!Array.isArray(rows)) {
         rows = [rows];
     }
-    for (let row of rows){
+
+    console.log(rows);
+    rows = U.addIdsAndInherits(db, tableId, rows);
+    console.log(rows);
+
+    // get all our insert queries
+    let queries = getInsertQueries(db, tableId, rows);
+    U.naiveWrapper(false, db, queries, error => {
+        if (error) {
+            callback(error);
+        } else {
+            callback(null, rows);
+        }
+    });
+};
+
+const getInsertQueries = (db, tableId, rows) => {
+    const tableConfig = db.tables[tableId];
+    let columnsList = Object.keys(tableConfig.columns);
+    let values = [];
+
+    for (let row of rows) {
         let rowValues = [];
 
-        for (let colId of columnsList){
+        for (let colId of columnsList) {
             let columnConfig = tableConfig.columns[colId];
-            let cellValue = U.getCellValue(columnConfig, row[colId]);
-            console.log('cellvalue');
-            console.log(cellValue);
-            if (columnConfig.mandatory && cellValue === undefined){
-                throw new Error(`column ${colId} in table ${tableId} is mandatory`);
+            let cellValue = U.getCellValue(columnConfig, row[colId], colId);
+            if (
+                (columnConfig.mandatory || columnConfig.isKey) &&
+                cellValue === undefined
+            ) {
+                throw new Error(
+                    `column ${colId} in table ${tableId} is mandatory`
+                );
             }
 
             rowValues.push(cellValue);
@@ -32,34 +51,32 @@ const getInsertQueries = (db, tableId, rows) => {
         'INSERT INTO %I (%s) VALUES %L',
         tableId,
         columnsList.join(', '),
-        values);
+        values
+    );
 
-    console.log(columnsList);
-
-    console.log('main query');
-    console.log(mainQuery);
-
+    console.log('checking subtables for table');
+    console.log(tableId);
     let subQueries = [];
     // check if we need to update other tables
-    if (tableConfig.subTables){
+    if (tableConfig.subTables) {
         tableConfig.subTables.forEach(subTable => {
             let subRows = [];
             rows.forEach(row => {
-                if (row[subTable.id]){
-                    let rowsToAdd = row[subTable.id].map(subRow => {
-                        subRow[subTable.parentid] = row[keyProp];
-                        return subRow;
-                    });
-                    subRows = subRows.concat(rowsToAdd);
+                if (row[subTable.id]) {
+                    subRows = subRows.concat(row[subTable.id]);
                 }
             });
-            if (subRows.length > 1){
-                subQueries = subQueries.concat(getInsertQueries(db, subTable.id, subRows));
+            if (subRows.length > 0) {
+                subQueries = subQueries.concat(
+                    getInsertQueries(db, subTable.id, subRows)
+                );
             }
         });
     }
+    console.log('found subtables:');
+    console.log(subQueries);
 
     return [mainQuery, ...subQueries];
 };
 
-module.exports = {getInsertQueries};
+module.exports = { insert, getInsertQueries };

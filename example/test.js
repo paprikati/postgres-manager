@@ -8,8 +8,7 @@ const dbConf = {
     port: 5432
 };
 
-
-const db = PG.connect({tables, db: dbConf});
+const db = PG.connect({ tables, db: dbConf });
 
 // const meals1 = [
 //     {id: 'aa790548-8c6c-11e9-bc42-526af7764f00', mealtype: 'dinner', planid: '19790548-8c6c-11e9-bc42-526af7764f64'},
@@ -66,37 +65,56 @@ const db = PG.connect({tables, db: dbConf});
 // }));
 
 const getTree = s => {
-    return {id: s + 1, name: 'PARENT1', children: [
-        {id: s + 2, name: 'CHILD1', gender: null },
-        {id: s + 3, name: 'CHILD2', gender: true, grandchildren: [
-            {id: s + 4, name: 'GCHILD2.1'},
-            {id: s + 5, name: 'GCHILD2.2'}
-        ]},
-        {id: s + 6, name: 'CHILD3', gender: false, grandchildren: [
-            {id: s + 7, name: 'GCHILD3.1'},
-            {id: s + 8, name: 'GCHILD3.2'}
-        ]}
-    ]};
+    return {
+        id: s + 1,
+        name: 'PARENT1',
+        children: [
+            { id: s + 2, name: 'CHILD1', gender: null },
+            {
+                id: s + 3,
+                name: 'CHILD2',
+                gender: true,
+                grandchildren: [
+                    { id: s + 4, name: 'GCHILD2.1' },
+                    { id: s + 5, name: 'GCHILD2.2' }
+                ]
+            },
+            {
+                id: s + 6,
+                name: 'CHILD3',
+                gender: false,
+                grandchildren: [
+                    { id: s + 7, name: 'GCHILD3.1' },
+                    { id: s + 8, name: 'GCHILD3.2' }
+                ]
+            }
+        ]
+    };
 };
 
 const callback = (err, resp) => {
-    if (err){
+    if (err) {
         console.log(err);
     } else {
         console.log(resp);
+        console.log(resp[0]);
     }
     process.exit();
 };
 
 console.log('hello');
 
+db.insert(
+    'parents',
+    [{ name: 'hi', children: [{ name: 'kid1' }, { name: 'kid2' }] }],
+    callback
+);
 
 // db.insert('parents', getTree(70), callback);
-db.insert('children', [{id: 23, name: 'control', parentid: 1000, testarr: ['a', 'b', 'c']}], callback);
+// db.insert('children', [{id: 23, name: 'control', parentid: 1000, testarr: ['a', 'b', 'c']}], callback);
 // db.delete('parents', {_filter: {id: 51}}, callback);
 
 // db.deleteById('grandchildren', {ids: [74, 75]}, callback);
-
 
 // db.updateById('parents', data, callback);
 // db.delete('children', {hard: false, filters: [['id', 3]]}, callback);
@@ -122,4 +140,3 @@ db.insert('children', [{id: 23, name: 'control', parentid: 1000, testarr: ['a', 
 //     }
 //     process.exit();
 // });
-

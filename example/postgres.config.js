@@ -1,5 +1,6 @@
 module.exports = {
     parents: {
+        generateUUID: true,
         deleteConfig: {
             shallow: 'sometimes',
             hard: 'never', // can be always or sometimes
@@ -8,7 +9,8 @@ module.exports = {
         columns: {
             id: {
                 isKey: true,
-                dataType: 'int'},
+                dataType: 'int'
+            },
             name: {
                 mandatory: true,
                 dataType: 'varchar',
@@ -24,6 +26,7 @@ module.exports = {
         ]
     },
     children: {
+        generateUUID: true,
         deleteConfig: {
             tableId: 'deleted_children',
             columns: ['id', 'parentid', 'name']

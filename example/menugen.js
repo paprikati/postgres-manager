@@ -1,17 +1,19 @@
-const editableJSON = {editable: true, dataType: 'json'};
-const editManUUID = {editable: true, dataType: 'uuid', mandatory: true};
-const fixedUUID = {editable: false, dataType: 'uuid', mandatory: true};
-const key = {isKey: true, dataType: 'uuid'};
+const editableJSON = { editable: true, dataType: 'json' };
+const editManUUID = { editable: true, dataType: 'uuid', mandatory: true };
+const fixedUUID = { editable: false, dataType: 'uuid', mandatory: true };
+const key = { isKey: true, dataType: 'uuid' };
 const basicInt = {
     dataType: 'int',
     min: 0,
     max: 100,
     editable: true
 };
-const editManStr30 = {dataType: 'varchar',
+const editManStr30 = {
+    dataType: 'varchar',
     maxLength: 30,
     editable: true,
-    mandatory: true};
+    mandatory: true
+};
 
 module.exports = {
     plans: {
@@ -42,7 +44,14 @@ module.exports = {
                 parentid: 'planid'
             }
         ],
-        indexes: {}
+        indexes: {},
+        generateUUID: true,
+        deleteConfig: {
+            tableId: 'deleted_plans',
+            condense: 'always',
+            valColumn: 'plan',
+            keyColumn: 'id'
+        }
     },
     meals: {
         columns: {
@@ -67,7 +76,7 @@ module.exports = {
             },
             headcount_modifier: editableJSON,
             courses: {
-                dataType: 'array', // TO VERIFY is this correct? json or array
+                dataType: 'json',
                 editable: true
             },
             planid: {
@@ -75,10 +84,15 @@ module.exports = {
                 dataType: 'uuid'
             }
         },
-        subTables: [{
-            id: 'recipe_records',
-            parentid: 'mealid'
-        }]
+        subTables: [
+            {
+                id: 'recipe_records',
+                parentid: 'mealid',
+                inherits: ['planid']
+            }
+        ],
+        sortBy: 'displayorder',
+        generateUUID: true
     },
     recipe_records: {
         columns: {
@@ -104,7 +118,9 @@ module.exports = {
                 },
                 editable: true
             }
-        }
+        },
+        sortBy: 'displayorder',
+        generateUUID: true
     },
     recipes: {
         columns: {
@@ -117,7 +133,7 @@ module.exports = {
                 editable: true
             },
             serves: {
-                serves: 'int',
+                dataType: 'int',
                 max: 500,
                 editable: true,
                 mandatory: true
@@ -129,14 +145,21 @@ module.exports = {
                     maxLength: 40
                 }
             },
-            searchInfo: editableJSON
+            searchinfo: editableJSON
         },
         subTables: [
             {
                 id: 'variants',
                 parentid: 'recipeid'
             }
-        ]
+        ],
+        generateUUID: true,
+        deleteConfig: {
+            tableId: 'deleted_recipes',
+            condense: 'always',
+            valColumn: 'recipe',
+            keyColumn: 'id'
+        }
     },
     variants: {
         columns: {
@@ -164,9 +187,12 @@ module.exports = {
         subTables: [
             {
                 id: 'ingredients',
-                parentid: 'variantid'
+                parentid: 'variantid',
+                inherits: ['recipeid']
             }
-        ]
+        ],
+        generateUUID: true,
+        sortBy: 'displayorder'
     },
     ingredients: {
         columns: {
@@ -181,7 +207,9 @@ module.exports = {
                 mandatory: true
             },
             foodid: editManUUID
-        }
+        },
+        generateUUID: true,
+        sortBy: 'displayorder'
     },
     foods: {
         columns: {
@@ -202,6 +230,11 @@ module.exports = {
                 dataType: 'bool',
                 editable: true
             }
-        }
+        },
+        mapOnRetrieve: row => {
+            row.allergens = row.allergens || [];
+            return row;
+        },
+        generateUUID: true
     }
 };

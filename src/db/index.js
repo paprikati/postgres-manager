@@ -1,14 +1,12 @@
 const { Pool, types } = require('pg');
 const U = require('./utils');
 
-const {getInsertQueries} = require('./lib/insert');
-const {retrieve} = require('./lib/retrieve');
-const {updateById, getSimpleUpdateQuery} = require('./lib/update');
-const {_delete, deleteById} = require('./lib/delete');
+const { insert } = require('./lib/insert');
+const { retrieve, retrieveById } = require('./lib/retrieve');
+const { updateById, getSimpleUpdateQuery } = require('./lib/update');
+const { _delete, deleteById } = require('./lib/delete');
 
-
-module.exports = function DB({tables, db}){
-
+module.exports = function DB({ tables, db }) {
     this.pool = new Pool(db);
 
     // make dates return a js date object
@@ -21,13 +19,14 @@ module.exports = function DB({tables, db}){
 
     // populate table.key in each table config
     Object.keys(tables).forEach(tableId => {
-        let keyProp = Object.keys(tables[tableId].columns).filter(colid => tables[tableId].columns[colid].isKey)[0];
+        let keyProp = Object.keys(tables[tableId].columns).filter(
+            colid => tables[tableId].columns[colid].isKey
+        )[0];
         this.tables[tableId].key = keyProp;
     });
 
     this.insert = (tableId, rows, cb) => {
-        let queries = getInsertQueries(this, tableId, rows);
-        U.naiveWrapper(true, this, queries, cb);
+        insert(this, tableId, rows, cb);
     };
 
     this.update = (tableId, config, cb) => {
@@ -35,18 +34,18 @@ module.exports = function DB({tables, db}){
         U.naiveWrapper(true, this, queries, cb);
     };
 
-    this.updateById = (tableId, config, cb) => {
-        updateById(this, tableId, config, cb);
+    this.updateById = (tableId, data, cb) => {
+        updateById(this, tableId, data, cb);
+    };
+
+    this.getById = (tableId, options, cb) => {
+        retrieveById(this, { tableId, ...options }, cb);
     };
 
     this.get = (tableId, options, cb) => {
-        retrieve(this, {tableId, ...options}, cb);
+        retrieve(this, { tableId, ...options }, cb);
     };
     this.retrieve = this.get; // alias
-
-    this.getAll = (tableId, cb) => {
-        retrieve(this, {tableId}, cb);
-    };
 
     this.delete = (tableId, config, cb) => {
         _delete(this, tableId, config, cb);
@@ -55,7 +54,6 @@ module.exports = function DB({tables, db}){
     this.deleteById = (tableId, config, cb) => {
         deleteById(this, tableId, config, cb);
     };
-
 
     return this;
 };
