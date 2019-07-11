@@ -188,6 +188,9 @@ const naiveWrapper = (parallel, db, queries, cb) => {
     if (!cb) {
         cb = () => {};
     }
+    if (typeof queries === 'string') {
+        queries = [queries];
+    }
     try {
         let _tasks = queries.map(query => {
             return c1 => {
