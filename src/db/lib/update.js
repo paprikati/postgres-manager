@@ -48,6 +48,10 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
         tableConfig.columns
     );
 
+    if (toUpdateString.length === 0) {
+        throw new Error('Please ensure there are some valid columns to update');
+    }
+
     let mainQuery = format(
         'UPDATE %I SET %s %s',
         tableId,

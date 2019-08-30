@@ -68,8 +68,24 @@ additionally, for arrays:
 };
 ```
 
-Things like insert have two different modes
-1. Naive (do everything as fast as possible) - this is the default. It will not wait for specific calls to be successful (but will ensure all queries pass validation)
-2. Careful (do everything in the 'right' order) - to do.
 
 
+## Using the DB Methods
+
+### `db.update`
+
+```js
+db.update('mytable',{_filter:{id:123}, data:{newCol:'newVal'}})
+```
+
+* `data` - an object with the data you want to update on the nodes
+* `_filter` - an object defining which nodes you want to update
+* `columns` - which columns you want to update (only required in strict mode)
+* `strict` - is the update in strict mode?
+
+### `db.deleteById`
+
+* `id` - a single id to delete
+* `ids` - an array of objects to delete
+* `hard` - should the row be saved in a 'deleted' table somewhere?
+* `shallow` - should child rows also be deleted
