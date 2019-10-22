@@ -1,6 +1,8 @@
 const { Pool, types } = require('pg');
 const U = require('./utils');
 
+const initialise = require('./lib/initialise');
+const reset = require('./lib/reset');
 const { insert } = require('./lib/insert');
 const { retrieve, retrieveById } = require('./lib/retrieve');
 const { updateById, getSimpleUpdateQuery } = require('./lib/update');
@@ -26,7 +28,21 @@ module.exports = function DB({ tables, db }) {
     });
 
     this.insert = (tableId, rows, cb) => {
-        insert(this, tableId, rows, cb);
+        insert(this, tableId, rows, {}, cb);
+    };
+
+    this.insertWithOpts = (tableId, rows, options, cb) => {
+        insert(this, tableId, rows, options, cb);
+    };
+
+    this.insertAndPrep = (tableId, rows, prep, cb) => {
+        insert(this, tableId, rows, {}, (err, data) => {
+            if (err) {
+                cb(err);
+            } else {
+                cb(null, prep(data));
+            }
+        });
     };
 
     this.update = (tableId, config, cb) => {
@@ -45,6 +61,17 @@ module.exports = function DB({ tables, db }) {
     this.get = (tableId, options, cb) => {
         retrieve(this, { tableId, ...options }, cb);
     };
+
+    this.getAndPrep = (tableId, options, prep, cb) => {
+        retrieve(this, { tableId, ...options }, (err, data) => {
+            if (err) {
+                cb(err);
+            } else {
+                cb(null, prep(data));
+            }
+        });
+    };
+
     this.retrieve = this.get; // alias
 
     this.delete = (tableId, config, cb) => {
@@ -53,6 +80,14 @@ module.exports = function DB({ tables, db }) {
 
     this.deleteById = (tableId, config, cb) => {
         deleteById(this, tableId, config, cb);
+    };
+
+    this.initialise = cb => {
+        initialise(this, cb);
+    };
+
+    this.reset = cb => {
+        reset(this, cb);
     };
 
     return this;
