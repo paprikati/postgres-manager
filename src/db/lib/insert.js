@@ -1,26 +1,29 @@
 const U = require('../utils');
 const format = require('pg-format');
-const uuid = require('uuid').v4;
 
-const insert = (db, tableId, rows, callback) => {
-    if (!Array.isArray(rows)) {
-        rows = [rows];
-    }
-
-    rows = U.addIdsAndInherits(db, tableId, rows);
-
-    // get all our insert queries
-    let queries = getInsertQueries(db, tableId, rows);
-    U.naiveWrapper(false, db, queries, error => {
-        if (error) {
-            callback(error);
-        } else {
-            callback(null, rows);
+const insert = (db, tableId, rows, options, callback) => {
+    try {
+        if (!Array.isArray(rows)) {
+            rows = [rows];
         }
-    });
+
+        rows = U.addIdsAndInherits(db, tableId, rows);
+
+        // get all our insert queries
+        let queries = getInsertQueries(db, tableId, rows, options);
+        U.naiveWrapper(false, db, queries, error => {
+            if (error) {
+                callback(error);
+            } else {
+                callback(null, rows);
+            }
+        });
+    } catch (e) {
+        callback(e);
+    }
 };
 
-const getInsertQueries = (db, tableId, rows) => {
+const getInsertQueries = (db, tableId, rows, options) => {
     const tableConfig = db.tables[tableId];
     let columnsList = Object.keys(tableConfig.columns);
     let values = [];
@@ -51,6 +54,10 @@ const getInsertQueries = (db, tableId, rows) => {
         columnsList.join(', '),
         values
     );
+
+    if (options && options.ignoreConflicts) {
+        mainQuery += ' ON CONFLICT DO NOTHING';
+    }
 
     let subQueries = [];
     // check if we need to update other tables

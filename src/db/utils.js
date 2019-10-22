@@ -9,6 +9,12 @@ const isGuid = str => {
     return regex.test(str);
 };
 
+const formatDate = epoch => {
+    let d = new Date(epoch);
+    const pad = int => int.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 const indexArr = (arr, prop, returnArrs) => {
     const output = {};
     arr.forEach(item => {
@@ -102,9 +108,7 @@ const getCellValue = (config, val, colid) => {
             }
             if (val && val.length > config.maxLength) {
                 throw new Error(
-                    `String ${val} exceeds length limit ${
-                        config.maxLength
-                    } for column ${colid}`
+                    `String ${val} exceeds length limit ${config.maxLength} for column ${colid}`
                 );
             }
             return val;
@@ -133,7 +137,13 @@ const getCellValue = (config, val, colid) => {
             checkMinMax(config, val);
             return val;
         case 'date':
-            return val;
+            let epoch = Date.parse(val);
+            if (isNaN(epoch)) {
+                throw new Error(
+                    `${val} is not a valid date for column ${colid}`
+                );
+            }
+            return formatDate(epoch);
         case 'json':
             return JSON.stringify(val);
         case 'array':
@@ -266,6 +276,17 @@ const fixOutputData = (outputData, tableConfig) => {
             a[sortBy] > b[sortBy] ? 1 : -1
         );
     }
+
+    // handle dates (grrrr)
+    outputData = outputData.map(x => {
+        Object.entries(tableConfig.columns).forEach(([colid, col]) => {
+            if (col.dataType === 'date' && x[colid]) {
+                x[colid] = formatDate(Date.parse(x[colid]));
+            }
+        });
+        return x;
+    });
+
     if (mapOnRetrieve) {
         outputData = outputData.map(mapOnRetrieve);
     }

@@ -87,6 +87,8 @@ const updateById = (db, tableId, data, callback) => {
         if (err) {
             callback(err);
             return;
+        } else if (resp.rowCount === 0) {
+            callback('MISSING_RESOURCE');
         } else {
             let _tasks = [];
             // then loop through subTables and see if theres anything there to update
@@ -153,7 +155,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
             const _tasks = [
                 function(c) {
                     if (toCreate.length > 0) {
-                        insert(db, subTable.id, toCreate, c);
+                        insert(db, subTable.id, toCreate, {}, c);
                     } else {
                         c();
                     }
