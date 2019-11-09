@@ -90,5 +90,9 @@ module.exports = function DB({ tables, db }) {
         reset(this, cb);
     };
 
+    this.query = (query, cb) => {
+        this.pool.query(query, cb);
+    };
+
     return this;
 };
