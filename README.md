@@ -68,24 +68,117 @@ additionally, for arrays:
 };
 ```
 
-
-
 ## Using the DB Methods
+
+### `db.insert`
+
+Inserts a row (or rows) into the db
+
+```js
+db.insert('people', [{id:1, name:'A'}], cb)
+```
+
+#### `db.insertWithOpts`
+
+Supports an options argument. Currently the only supported options are:
+* `ignoreConflicts` - if true, will ignore conflicts and return the conflicting resource (a bit like getOrInsert)
+
+```js
+db.insertWithOpts('people', [{id:1, name:'A'}], {ignoreConflicts:true}, cb)
+```
+
+#### `db.insertAndPrep`
+
+Supports a `prep` function to apply to the data before it is returned
+
+```js
+db.insertAndPrep('people', [{id:1, name:'A'}], data => data[0], cb)
+```
 
 ### `db.update`
 
 ```js
-db.update('mytable',{_filter:{id:123}, data:{newCol:'newVal'}})
+db.update('mytable',{_filter:{id:123}, data:{newCol:'newVal'}}, cb)
 ```
+Options:
 
 * `data` - an object with the data you want to update on the nodes
 * `_filter` - an object defining which nodes you want to update
 * `columns` - which columns you want to update (only required in strict mode)
 * `strict` - is the update in strict mode?
 
+Note - updates run in parallel, so don't return a response object
+
+#### `db.updateById`
+
+```js
+db.update('mytable',{newCol:'newVal', id:123}, cb);
+```
+
+### `db.get` OR `db.retrieve`
+
+```js
+db.get('people', { _filter: { id: 234 } }, cb);
+```
+
+Options:
+- `_filter` - an object defining which nodes you want to retrieve
+- `shallow` - if true, it won't get any 'child' records - i.e. it will only hit one table
+- `index` - if true, it will return the objects as a dictionary using the IDs, rather than as an array.
+
+### `db.getById`
+
+```js
+db.getById('people',{id: 123}, cb);
+```
+
+Options:
+- `id` - the id of the record
+- `shallow` - if true, it won't get any 'child' records - i.e. it will only hit one table
+
+#### `db.getAndPrep`
+
+Supports a `prep` function to apply to the data before it is returned
+
+```js
+db.getAndPrep('people', { _filter: { id: 234 } }, data => data[0], cb);
+```
+
+### `db.delete`
+
+```js
+ db.delete('people', { _filter: { id: 123 } }, cb);
+```
+
+* `_filter` - an object defining which nodes you want to delete
+* `hard` - should the row be saved in a 'deleted' table somewhere? (defaults to false)
+* `shallow` - should child rows also be deleted
+
 ### `db.deleteById`
 
+```js
+db.deleteById('people',  { id: seedId }, cb);
+```
+
 * `id` - a single id to delete
-* `ids` - an array of objects to delete
-* `hard` - should the row be saved in a 'deleted' table somewhere?
+* `ids` - an array of ids to delete
+* `hard` - should the row be saved in a 'deleted' table somewhere? (defaults to false)
 * `shallow` - should child rows also be deleted
+
+## Utility functions
+
+### `db.query`
+
+Issues your query 'blindly'
+
+### `db.initialise`
+
+Creates all the tables specified in your config
+
+### `db.reset`
+
+Removes all the data from your tables
+
+### `db.drop`
+
+Drops all the tables from your database

@@ -247,18 +247,18 @@ const addIdsAndInherits = (db, tableId, rows, inherits) => {
         // go through subtables and add their ids
         tableConfig.subTables.forEach(subTable => {
             rows = rows.map(row => {
-                let inherits = {};
-                inherits[subTable.parentid] = row[keyProp];
+                let _inherits = {};
+                _inherits[subTable.parentid] = row[keyProp];
                 if (subTable.inherits) {
                     subTable.inherits.forEach(prop => {
-                        inherits[prop] = row[prop];
+                        _inherits[prop] = row[prop];
                     });
                 }
                 row[subTable.id] = addIdsAndInherits(
                     db,
                     subTable.id,
                     row[subTable.id],
-                    inherits
+                    _inherits
                 );
                 return row;
             });

@@ -63,6 +63,8 @@ module.exports = function DB({ tables, db }) {
         retrieve(this, { tableId, ...options }, cb);
     };
 
+    this.retrieve = this.get; // alias
+
     this.getAndPrep = (tableId, options, prep, cb) => {
         retrieve(this, { tableId, ...options }, (err, data) => {
             if (err) {
@@ -72,8 +74,6 @@ module.exports = function DB({ tables, db }) {
             }
         });
     };
-
-    this.retrieve = this.get; // alias
 
     this.delete = (tableId, config, cb) => {
         _delete(this, tableId, config, cb);

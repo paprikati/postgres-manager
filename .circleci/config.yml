@@ -1,0 +1,58 @@
+version: 2
+
+references:
+  job_defaults: &working_dir
+    working_directory: ~/menu-gen-online
+
+  postgres: &postgres
+    image: postgres:12
+    name: postgres
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abc123
+
+jobs:
+  test:
+    docker:
+    - image: node:10
+    - *postgres
+    parallelism: 1
+    environment:
+    - NODE_ENV: test
+    - DB_HOST: postgres
+    - DB_PORT: 5432
+    steps:
+    - checkout
+    - restore_cache:
+        keys:
+        - cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
+    - run:
+        name: Install
+        working_directory: ''
+        command: "yarn install"
+    - run:
+        name: Run tests
+        no_output_timeout: 10m
+        command: "yarn test:ci \\\n   \\\n   \\\n   \\\n  "
+        working_directory: ''
+  eslint:
+    docker:
+    - image: node:10
+    steps:
+    - checkout
+    - run:
+        name: install dependencies
+        command: yarn
+    - run:
+        name: lint
+        command: node_modules/.bin/eslint -- .
+
+workflows:
+  test:
+    jobs:
+    - test
+  lint:
+    jobs:
+    - eslint
+  version: 2
