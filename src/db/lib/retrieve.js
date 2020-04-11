@@ -118,7 +118,7 @@ const retrieve = (db, config, callback) => {
             }
         };
 
-        db.pool.query(mainQuery, mainQueryCB);
+        db.query(mainQuery, mainQueryCB);
     } catch (e) {
         callback(e);
     }

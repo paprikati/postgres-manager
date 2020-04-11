@@ -60,3 +60,5 @@ typings/
 .postgres
 
 structure.sql
+
+*.received.sql

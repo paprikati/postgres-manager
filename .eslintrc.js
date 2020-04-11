@@ -1,18 +1,11 @@
 module.exports = {
     env: {
         es6: true,
-        node: true
+        node: true,
+        jasmine: true
     },
     parserOptions: {
         ecmaVersion: 2018
-    },
-    globals: {
-        describe: true,
-        it: true,
-        jasmine: true,
-        beforeAll: true,
-        beforeEach: true,
-        expect: true
     },
     rules: {
         'no-underscore-dangle': 0,
@@ -29,6 +22,7 @@ module.exports = {
         'no-extra-semi': 'error',
         curly: ['error', 'multi-line', 'consistent'],
         yoda: 'error',
+        "no-console": "warn",
         'no-cond-assign': 'warn',
         'no-label-var': 'error',
         'no-shadow': ['error', {    builtinGlobals: false,    hoist: 'functions',    allow: [] }],
@@ -48,5 +42,7 @@ module.exports = {
         'spaced-comment': ['error', 'always'],
         'object-curly-spacing': ['error', 'always'],
         'no-unexpected-multiline': ['error'],
+        'object-property-newline': ['error', {allowAllPropertiesOnSameLine:true}],
+        'no-extra-parens': ['error', 'all']
     }
 };

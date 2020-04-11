@@ -69,28 +69,6 @@ describe('Basic', function() {
         });
     });
 
-    describe('update', function() {
-        it('#update', function(done) {
-            const updatedSeedData = { name: 'Jane Doe' };
-            db.update('people', { data: updatedSeedData, _filter: { id: seedId } }, () => {
-                db.getById('people', { id: seedId }, (err, res) => {
-                    expect(res.name).toEqual('Jane Doe');
-                    expect(res.id).toEqual(seedId);
-                    done();
-                });
-            });
-        });
-        it('#updateById', function(done){
-            const updatedSeedData = { ...seedData, name: 'Jimmy Doe' };
-            db.updateById('people', updatedSeedData, () => {
-                db.getById('people', { id: seedId }, (err, res) => {
-                    expect(res).toEqual(seedData[0]);
-                    done();
-                });
-            });
-        });
-    });
-
     describe('retrieve', function() {
         it('#get', function(done) {
             db.get('people', { _filter: { id: seedId } }, (err, res) => {

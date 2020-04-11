@@ -65,7 +65,7 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
 const updateById = (db, tableId, data, callback) => {
     // run the updatequery for main table
 
-    const { pool, tables } = db;
+    const { tables } = db;
     const tableConfig = tables[tableId];
     const keyProp = tableConfig.key;
 
@@ -83,7 +83,7 @@ const updateById = (db, tableId, data, callback) => {
     const _filter = { [keyProp]: id };
     const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
 
-    pool.query(query, (err, resp) => {
+    db.query(query, (err, resp) => {
         if (err) {
             callback(err);
             return;
@@ -134,7 +134,7 @@ const bulkUpdateById = (db, tableId, rows, cb) => {
 };
 
 const updateSubTable = (subTable, id, newRows, db, cb) => {
-    const { pool, tables } = db;
+    const { tables } = db;
     const tableConfig = tables[subTable.id];
     const keyProp = tableConfig.key;
 
@@ -205,7 +205,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
             id
         );
 
-        pool.query(query, (error, results) => {
+        db.query(query, (error, results) => {
             if (error) {
                 c(error);
             } else {

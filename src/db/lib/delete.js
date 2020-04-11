@@ -199,7 +199,7 @@ const condenseDelete = (db, tableId, options, callback) => {
                 dataToInsert
             );
 
-            db.pool.query(insertQuery, insertCallback);
+            db.query(insertQuery, insertCallback);
         }
     }
 

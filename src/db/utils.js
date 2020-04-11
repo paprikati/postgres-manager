@@ -79,7 +79,7 @@ const checkMinMax = (config, val) => {
 };
 
 const getCellValue = (config, val, colid) => {
-    if ((!config.mandatory && val === undefined) || val === null) {
+    if (!config.mandatory && val === undefined || val === null) {
         return val;
     }
 
@@ -175,7 +175,7 @@ const getDiff = (existing, incoming) => {
     let toDeleteIds;
     let toUpdate = [];
     let toCreate = [];
-    if ((existing.length = 0)) {
+    if (existing.length = 0) {
         toCreate = incoming;
         toDeleteIds = [];
     } else {
@@ -204,7 +204,7 @@ const naiveWrapper = (parallel, db, queries, cb) => {
     try {
         let _tasks = queries.map(query => {
             return c1 => {
-                db.pool.query(query, err => {
+                db.query(query, err => {
                     if (err) {
                         c1(err);
                     } else {

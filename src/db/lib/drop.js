@@ -10,5 +10,5 @@ module.exports = function(db, callback) {
 
     let finalSQL = `DROP TABLE ${listOfTableIds.join(',')}`;
 
-    db.pool.query(finalSQL, callback);
+    db.query(finalSQL, callback);
 };

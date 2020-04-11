@@ -96,7 +96,14 @@ module.exports = function DB({ tables, db }) {
     };
 
     this.query = (query, cb) => {
+        this.queryLog.push(query);
         this.pool.query(query, cb);
+    };
+
+    this.queryLog = [];
+
+    this.clearQueryLog = () => {
+        this.queryLog = [];
     };
 
     return this;
