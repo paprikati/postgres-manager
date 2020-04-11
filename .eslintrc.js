@@ -43,6 +43,6 @@ module.exports = {
         'object-curly-spacing': ['error', 'always'],
         'no-unexpected-multiline': ['error'],
         'object-property-newline': ['error', {allowAllPropertiesOnSameLine:true}],
-        'no-extra-parens': ['error', 'all']
+        'arrow-parens': ['error','as-needed']
     }
 };

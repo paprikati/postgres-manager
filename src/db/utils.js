@@ -79,7 +79,7 @@ const checkMinMax = (config, val) => {
 };
 
 const getCellValue = (config, val, colid) => {
-    if (!config.mandatory && val === undefined || val === null) {
+    if ((!config.mandatory && val === undefined) || val === null) {
         return val;
     }
 

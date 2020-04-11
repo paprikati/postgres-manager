@@ -63,7 +63,7 @@ describe('Data Types', function() {
     describe('integers', function(){
 
         it('validates type', function(done){
-            db.insert('data_types', { id: uuid(), int: 3.5 }, (err) => {
+            db.insert('data_types', { id: uuid(), int: 3.5 }, err => {
                 expect(err.message).toBe('3.5 is not a valid integer for column int');
                 done();
             });
@@ -71,7 +71,7 @@ describe('Data Types', function() {
 
 
         it('validates min', function(done){
-            db.insert('data_types', { id: uuid(), int: -10 }, (err) => {
+            db.insert('data_types', { id: uuid(), int: -10 }, err => {
                 expect(err.message).toBe('-10 is below min limit -5');
                 done();
             });
@@ -79,7 +79,7 @@ describe('Data Types', function() {
 
 
         it('validates max', function(done){
-            db.insert('data_types', { id: uuid(), int: 6 }, (err) => {
+            db.insert('data_types', { id: uuid(), int: 6 }, err => {
                 expect(err.message).toBe('6 exceeds max limit 5');
                 done();
             });
@@ -87,7 +87,7 @@ describe('Data Types', function() {
     });
 
     it('validates that something is mandatory', function(done){
-        db.insert('data_types', { id: uuid(), int: 3 }, (err) => {
+        db.insert('data_types', { id: uuid(), int: 3 }, err => {
             expect(err.message).toBe('undefined is not a string for column mandatory');
             done();
         });
