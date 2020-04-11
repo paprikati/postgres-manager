@@ -69,10 +69,10 @@ const getUpdateString = (data, columnsToUpdate, columnConfig) => {
 };
 
 const checkMinMax = (config, val) => {
-    if (config.max && config.max < val) {
+    if ('max' in config && config.max < val) {
         throw new Error(`${val} exceeds max limit ${config.max}`);
     }
-    if (config.min && config.min < val) {
+    if ('min' in config && config.min > val) {
         throw new Error(`${val} is below min limit ${config.min}`);
     }
     return;
