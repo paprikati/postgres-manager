@@ -69,10 +69,10 @@ const getUpdateString = (data, columnsToUpdate, columnConfig) => {
 };
 
 const checkMinMax = (config, val) => {
-    if (config.max && config.max < val) {
+    if ('max' in config && config.max < val) {
         throw new Error(`${val} exceeds max limit ${config.max}`);
     }
-    if (config.min && config.min < val) {
+    if ('min' in config && config.min > val) {
         throw new Error(`${val} is below min limit ${config.min}`);
     }
     return;
@@ -247,18 +247,18 @@ const addIdsAndInherits = (db, tableId, rows, inherits) => {
         // go through subtables and add their ids
         tableConfig.subTables.forEach(subTable => {
             rows = rows.map(row => {
-                let inherits = {};
-                inherits[subTable.parentid] = row[keyProp];
+                let _inherits = {};
+                _inherits[subTable.parentid] = row[keyProp];
                 if (subTable.inherits) {
                     subTable.inherits.forEach(prop => {
-                        inherits[prop] = row[prop];
+                        _inherits[prop] = row[prop];
                     });
                 }
                 row[subTable.id] = addIdsAndInherits(
                     db,
                     subTable.id,
                     row[subTable.id],
-                    inherits
+                    _inherits
                 );
                 return row;
             });

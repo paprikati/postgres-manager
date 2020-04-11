@@ -1,10 +1,11 @@
 {
     "name": "postgres-manager",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "creates and manages a pg database",
     "main": "./src/index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "export DB_HOST=localhost && export DB_PORT=9702 && jasmine",
+        "test:ci": "jasmine"
     },
     "repository": {
         "type": "git",
@@ -28,5 +29,10 @@
         "pg": "^7.11.0",
         "pg-format": "^1.0.4",
         "uuid": "^3.3.2"
+    },
+    "devDependencies": {
+        "dotenv": "^8.2.0",
+        "eslint": "^6.8.0",
+        "jasmine": "^3.5.0"
     }
 }

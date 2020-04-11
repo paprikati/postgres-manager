@@ -18,14 +18,14 @@ module.exports = function(db, callback) {
         sqlArray.push(`CREATE TABLE ${tableId} (\n${columns}\n);`);
 
         if (tableConf.deleteConfig && tableConf.deleteConfig.tableId) {
-            let columns = [
+            let columnsSQL = [
                 `    "${tableConf.deleteConfig.keyColumn}" uuid PRIMARY KEY NOT NULL`,
                 `    "${tableConf.deleteConfig.valColumn}" json NOT NULl`
             ].join(',\n');
 
             // if it needs a backup
             sqlArray.push(
-                `CREATE TABLE ${tableConf.deleteConfig.tableId} (\n${columns}\n);`
+                `CREATE TABLE ${tableConf.deleteConfig.tableId} (\n${columnsSQL}\n);`
             );
         }
     });

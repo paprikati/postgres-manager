@@ -3,6 +3,7 @@ const U = require('./utils');
 
 const initialise = require('./lib/initialise');
 const reset = require('./lib/reset');
+const drop = require('./lib/drop');
 const { insert } = require('./lib/insert');
 const { retrieve, retrieveById } = require('./lib/retrieve');
 const { updateById, getSimpleUpdateQuery } = require('./lib/update');
@@ -62,6 +63,8 @@ module.exports = function DB({ tables, db }) {
         retrieve(this, { tableId, ...options }, cb);
     };
 
+    this.retrieve = this.get; // alias
+
     this.getAndPrep = (tableId, options, prep, cb) => {
         retrieve(this, { tableId, ...options }, (err, data) => {
             if (err) {
@@ -71,8 +74,6 @@ module.exports = function DB({ tables, db }) {
             }
         });
     };
-
-    this.retrieve = this.get; // alias
 
     this.delete = (tableId, config, cb) => {
         _delete(this, tableId, config, cb);
@@ -88,6 +89,10 @@ module.exports = function DB({ tables, db }) {
 
     this.reset = cb => {
         reset(this, cb);
+    };
+
+    this.drop = cb => {
+        drop(this, cb);
     };
 
     this.query = (query, cb) => {
