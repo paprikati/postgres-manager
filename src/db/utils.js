@@ -175,7 +175,7 @@ const getDiff = (existing, incoming) => {
     let toDeleteIds;
     let toUpdate = [];
     let toCreate = [];
-    if (existing.length = 0) {
+    if (existing.length == 0) {
         toCreate = incoming;
         toDeleteIds = [];
     } else {

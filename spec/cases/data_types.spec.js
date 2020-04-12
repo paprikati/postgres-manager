@@ -47,7 +47,7 @@ describe('Data Types', function() {
     describe('strings', function(){
 
         it('validates type', function(done){
-            db.insert('data_types', { id: uuid(), mandatory: 'hi', str: false }, (err, res) => {
+            db.insert('data_types', { id: uuid(), mandatory: 'hi', str: false }, err => {
                 expect(err.message).toBe('false is not a string for column str');
                 done();
             });

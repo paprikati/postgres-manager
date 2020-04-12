@@ -62,3 +62,5 @@ typings/
 structure.sql
 
 *.received.sql
+
+.vscode
