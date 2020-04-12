@@ -63,8 +63,7 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
     return mainQuery;
 };
 
-// INTERNAL ONLY ()
-const updateOne = (db, tableId, _filter, id, data, callback) => {
+const updateOne = (db, tableId, _filter, id, data, shallow, callback) => {
     const tableConfig = db.tables[tableId];
     const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
 
@@ -74,17 +73,18 @@ const updateOne = (db, tableId, _filter, id, data, callback) => {
             return;
         } else if (resp.rowCount === 0) {
             callback('MISSING_RESOURCE');
+            return;
         } else {
             let _tasks = [];
             // then loop through subTables and see if theres anything there to update
-            if (tableConfig.subTables) {
+            if (tableConfig.subTables && !shallow) {
                 tableConfig.subTables.forEach(subTable => {
                     // only do something if its on the data
                     if (data[subTable.prop]) {
 
                         _tasks.push(c1 => {
                             if (subTable.oneToOne){
-                                updateOne(db, subTable.id, { [subTable.parentid]: id }, id, data[subTable.prop], c1);
+                                updateOne(db, subTable.id, { [subTable.parentid]: id }, id, data[subTable.prop], null, c1);
                             } else {
                                 updateSubTable(
                                     subTable,
@@ -110,12 +110,12 @@ const updateOne = (db, tableId, _filter, id, data, callback) => {
                     callback(null, data);
                 }
             });
-        }
 
+        }
     });
 };
 
-const updateById = (db, tableId, data, callback) => {
+const updateById = (db, tableId, data, shallow, callback) => {
     const { tables } = db;
     const tableConfig = tables[tableId];
     const keyProp = tableConfig.key;
@@ -132,14 +132,14 @@ const updateById = (db, tableId, data, callback) => {
 
     const id = data[keyProp];
     const _filter = { [keyProp]: id };
-    updateOne(db, tableId, _filter, id, data, callback);
+    return updateOne(db, tableId, _filter, id, data, shallow, callback);
 };
 
-const bulkUpdateById = (db, tableId, rows, cb) => {
+const bulkUpdateById = (db, tableId, rows, shallow, cb) => {
     async.each(
         rows,
         (row, c1) => {
-            updateById(db, tableId, row, c1);
+            updateById(db, tableId, row,  shallow, c1);
         },
         cb
     );
@@ -175,7 +175,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
                 },
                 function(c) {
                     if (toUpdate.length > 0) {
-                        bulkUpdateById(db, subTable.id, toUpdate, c);
+                        bulkUpdateById(db, subTable.id, toUpdate, false, c);
                     } else {
                         c();
                     }

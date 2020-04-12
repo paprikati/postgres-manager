@@ -6,7 +6,7 @@ const reset = require('./lib/reset');
 const drop = require('./lib/drop');
 const { insert } = require('./lib/insert');
 const { retrieve, retrieveById } = require('./lib/retrieve');
-const { updateById, getSimpleUpdateQuery } = require('./lib/update');
+const { updateById, getSimpleUpdateQuery, bulkUpdateById } = require('./lib/update');
 const { _delete, deleteById } = require('./lib/delete');
 
 module.exports = function DB({ tables, db }) {
@@ -60,7 +60,19 @@ module.exports = function DB({ tables, db }) {
     };
 
     this.updateById = (tableId, data, cb) => {
-        updateById(this, tableId, data, cb);
+        updateById(this, tableId, data, false, cb);
+    };
+
+    this.updateByIdShallow = (tableId, data, cb) => {
+        updateById(this, tableId, data, true, cb);
+    };
+
+    this.bulkUpdateByIdShallow = (tableId, data, cb) => {
+        bulkUpdateById(this, tableId, data, true, cb);
+    };
+
+    this.bulkUpdateById = (tableId, data, cb) => {
+        bulkUpdateById(this, tableId, data, false, cb);
     };
 
     this.getById = (tableId, options, cb) => {

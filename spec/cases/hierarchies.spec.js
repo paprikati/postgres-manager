@@ -179,6 +179,27 @@ describe('Hierarchies', function() {
             );
         });
 
+        describe('update shallow', function(){
+            const updateData = _.cloneDeep(seedData[0]);
+            updateData.name = 'Granny Weatherwax';
+            updateData.parents[0].children[0].name = 'New Child Name';
+
+            it('#update deep', function(done) {
+                db.updateByIdShallow('grandparents', updateData, () => {
+                    db.getById('grandparents', { id: seedId }, (err, res) => {
+                        expect(res.name).toEqual('Granny Weatherwax');
+                        expect(res.parents[0].children[0].name).toEqual('Child 0-0');
+                        done();
+                    });
+                });
+            });
+
+            H.itIssuesCorrectSql(done => db.updateById('grandparents', updateData, done),
+                'hierarchies/update-shallow',
+                db
+            );
+        });
+
     });
 
     describe('retrieve', function() {
