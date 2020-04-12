@@ -8,6 +8,10 @@ const seedData = [
     {
         id: seedId,
         name: 'John Doe'
+    },
+    {
+        id: uuid(),
+        name: 'Michael McMannus'
     }
 ];
 
@@ -24,6 +28,18 @@ describe('Basic', function() {
         });
     });
 
+    afterAll(done => db.drop(done));
+
+    H.itIssuesCorrectSql(done => {
+        db.drop(() => {
+            db.clearQueryLog();
+            db.initialise(done);
+        });
+    },
+    'basics/initialise-db',
+    db
+    );
+
     describe('insert', function() {
         it('#insert', function(done) {
             const testData = { id: uuid(), name: 'Charlie Chaplain' };
@@ -39,13 +55,13 @@ describe('Basic', function() {
         );
 
         it('#insertWithOpts', function(done){
-            db.insertWithOpts('people', seedData, { ignoreConflicts: true }, (error, res) => {
-                expect(res).toEqual(seedData);
+            db.insertWithOpts('people', [seedData[0]], { ignoreConflicts: true }, (error, res) => {
+                expect(res).toEqual([seedData[0]]);
                 done();
             });
         });
 
-        H.itIssuesCorrectSql(done => db.insertWithOpts('people', seedData, { ignoreConflicts: true }, done),
+        H.itIssuesCorrectSql(done => db.insertWithOpts('people', [seedData[0]], { ignoreConflicts: true }, done),
             'basics/insertWithOpts',
             db
         );
@@ -180,7 +196,7 @@ describe('Basic', function() {
         );
 
         it('#deleteById with ids', function(done) {
-            db.deleteById('people',  { ids: [seedId], hard: true }, () => {
+            db.deleteById('people',  { ids: seedData.map(x => x.id), hard: true }, () => {
                 db.get('people', { _filter: { id: seedId } }, (err, res) => {
                     expect(res.length).toEqual(0);
                     done();
@@ -188,7 +204,7 @@ describe('Basic', function() {
             });
         });
 
-        H.itIssuesCorrectSql(done => db.deleteById('people', { ids: [seedId], hard: true }, done),
+        H.itIssuesCorrectSql(done => db.deleteById('people', { ids: seedData.map(x => x.id), hard: true }, done),
             'basics/deleteById-multiple',
             db
         );

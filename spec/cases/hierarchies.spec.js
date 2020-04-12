@@ -105,14 +105,23 @@ describe('Hierarchies', function() {
             });
         });
     });
+    afterAll(done => db.drop(done));
+
+    H.itIssuesCorrectSql(done => {
+        db.drop(() => {
+            db.clearQueryLog();
+            db.initialise(done);
+        });
+    },
+    'hierarchies/initialise-db',
+    db
+    );
 
     describe('insert', function() {
         H.itIssuesCorrectSql(done =>
             db.reset(() => {
                 db.clearQueryLog();
-                db.insert('grandparents', seedData, err => {
-                    done();
-                });
+                db.insert('grandparents', seedData, done);
             }),
         'hierarchies/insert',
         db
@@ -155,7 +164,7 @@ describe('Hierarchies', function() {
             deepUpdateData.parents[0].home.name = 'New Home Name';
 
             it('#update deep', function(done) {
-                db.updateById('grandparents', deepUpdateData, e => {
+                db.updateById('grandparents', deepUpdateData, () => {
                     db.getById('grandparents', { id: seedId }, (err, res) => {
                         expect(res.parents[0].children[0].name).toEqual('New Child Name');
                         expect(res.parents[0].home.name).toEqual('New Home Name');

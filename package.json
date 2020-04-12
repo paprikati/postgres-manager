@@ -5,7 +5,8 @@
     "main": "./src/index.js",
     "scripts": {
         "test": "export DB_HOST=localhost && export DB_PORT=9702 && jasmine",
-        "test:ci": "jasmine"
+        "test:ci": "jasmine",
+        "test:c8": "c8 yarn test"
     },
     "repository": {
         "type": "git",
@@ -31,6 +32,7 @@
         "uuid": "^3.3.2"
     },
     "devDependencies": {
+        "c8": "^7.1.0",
         "dotenv": "^8.2.0",
         "eslint": "^6.8.0",
         "fs-extra": "^9.0.0",

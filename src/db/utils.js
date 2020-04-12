@@ -85,7 +85,7 @@ const getCellValue = (config, val, colid) => {
 
     if (config.validator && !config.validator(val)) {
         throw new Error(
-            `${val} failed custom validation function for column ${colid}`
+            `"${val}" failed custom validation function for column ${colid}`
         );
     }
 
@@ -117,7 +117,6 @@ const getCellValue = (config, val, colid) => {
             if (typeof val === 'string') {
                 val = parseFloat(val);
             }
-            // TODO add validation here
             if (typeof val !== 'number' || !Number.isInteger(val)) {
                 throw new Error(
                     `${val} is not a valid integer for column ${colid}`
@@ -175,7 +174,7 @@ const getDiff = (existing, incoming) => {
     let toDeleteIds;
     let toUpdate = [];
     let toCreate = [];
-    if (existing.length = 0) {
+    if (existing.length == 0) {
         toCreate = incoming;
         toDeleteIds = [];
     } else {

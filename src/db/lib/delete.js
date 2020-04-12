@@ -169,6 +169,8 @@ const getDeleteQueries = (db, tableId, config, isHard) => {
 
     return queries;
 };
+
+// TODO: work out what this does
 const condenseDelete = (db, tableId, options, callback) => {
     const tableConfig = db.tables[tableId];
     const { deleteConfig } = tableConfig;

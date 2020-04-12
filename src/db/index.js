@@ -15,6 +15,7 @@ module.exports = function DB({ tables, db }) {
     // make dates return a js date object
     var DATATYPE_DATE = 1082;
     types.setTypeParser(DATATYPE_DATE, function(val) {
+        /* c8 ignore next */
         return val ? new Date(val) : val;
     });
 

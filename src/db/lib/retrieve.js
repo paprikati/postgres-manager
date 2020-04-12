@@ -135,7 +135,7 @@ const retrieveById = (db, config, callback) => {
         if (err) {
             callback(err);
             return;
-        } else if (rows.length === 0) {
+        } else if (!rows || rows.length === 0) {
             callback('MISSING_RESOURCE');
         } else {
             callback(null, rows[0]);

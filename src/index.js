@@ -8,6 +8,4 @@ function connect(config) {
 module.exports = {
     connect,
     helpers
-    // checkSchema,
-    // fixSchema, // modes 'hard' including deletes and 'soft' with no deletion
 };
