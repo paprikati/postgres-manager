@@ -68,13 +68,13 @@ const _delete = (db, tableId, options, cb) => {
     };
 
     const retrieveCallback = (err, idObjs) => {
-        let numberOfRowsDeleted = idObjs.length;
         if (err) {
             cb(err);
             return;
         }
+        let numberOfRowsDeleted = idObjs ? idObjs.length : 0;
         if (numberOfRowsDeleted === 0) {
-            cb(null, numberOfRowsDeleted);
+            cb(null, 0);
             return;
         }
 
@@ -199,7 +199,7 @@ const condenseDelete = (db, tableId, options, callback) => {
                 dataToInsert
             );
 
-            db.pool.query(insertQuery, insertCallback);
+            db.query(insertQuery, insertCallback);
         }
     }
 

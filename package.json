@@ -1,6 +1,6 @@
 {
     "name": "postgres-manager",
-    "version": "0.0.8",
+    "version": "0.1.0",
     "description": "creates and manages a pg database",
     "main": "./src/index.js",
     "scripts": {
@@ -33,6 +33,8 @@
     "devDependencies": {
         "dotenv": "^8.2.0",
         "eslint": "^6.8.0",
-        "jasmine": "^3.5.0"
+        "fs-extra": "^9.0.0",
+        "jasmine": "^3.5.0",
+        "lodash": "^4.17.15"
     }
 }

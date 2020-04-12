@@ -182,3 +182,11 @@ Removes all the data from your tables
 ### `db.drop`
 
 Drops all the tables from your database
+
+### `db.queryLog`
+
+Stores (as an array) the strings exactly as they are sent to the database
+
+### `db.clearQueryLog`
+
+Clears the query log

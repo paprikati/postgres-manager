@@ -65,8 +65,12 @@ const getInsertQueries = (db, tableId, rows, options) => {
         tableConfig.subTables.forEach(subTable => {
             let subRows = [];
             rows.forEach(row => {
-                if (row[subTable.id]) {
-                    subRows = subRows.concat(row[subTable.id]);
+                if (row[subTable.prop]) {
+                    if (subTable.oneToOne){
+                        subRows.push(row[subTable.prop]);
+                    } else {
+                        subRows = subRows.concat(row[subTable.prop]);
+                    }
                 }
             });
             if (subRows.length > 0) {

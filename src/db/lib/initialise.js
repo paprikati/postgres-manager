@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 module.exports = function(db, callback) {
     const sqlArray = [];
 
@@ -35,7 +36,7 @@ module.exports = function(db, callback) {
     const fs = require('fs');
     fs.writeFileSync('./structure.sql', finalSQL);
 
-    db.pool.query(finalSQL, callback);
+    db.query(finalSQL, callback);
 };
 
 function getSqlType(config) {

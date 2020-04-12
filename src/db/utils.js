@@ -175,7 +175,7 @@ const getDiff = (existing, incoming) => {
     let toDeleteIds;
     let toUpdate = [];
     let toCreate = [];
-    if ((existing.length = 0)) {
+    if (existing.length = 0) {
         toCreate = incoming;
         toDeleteIds = [];
     } else {
@@ -204,7 +204,7 @@ const naiveWrapper = (parallel, db, queries, cb) => {
     try {
         let _tasks = queries.map(query => {
             return c1 => {
-                db.pool.query(query, err => {
+                db.query(query, err => {
                     if (err) {
                         c1(err);
                     } else {
@@ -229,6 +229,7 @@ const addIdsAndInherits = (db, tableId, rows, inherits) => {
         rows = [rows];
         backToObj = true;
     }
+
     const tableConfig = db.tables[tableId];
     const keyProp = tableConfig.key;
 
@@ -254,10 +255,10 @@ const addIdsAndInherits = (db, tableId, rows, inherits) => {
                         _inherits[prop] = row[prop];
                     });
                 }
-                row[subTable.id] = addIdsAndInherits(
+                row[subTable.prop] = addIdsAndInherits(
                     db,
                     subTable.id,
-                    row[subTable.id],
+                    row[subTable.prop],
                     _inherits
                 );
                 return row;

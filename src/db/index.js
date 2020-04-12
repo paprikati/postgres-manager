@@ -26,6 +26,13 @@ module.exports = function DB({ tables, db }) {
             colid => tables[tableId].columns[colid].isKey
         )[0];
         this.tables[tableId].key = keyProp;
+
+        // populate subTable prop with subTable id by default
+        if (tables[tableId].subTables){
+            tables[tableId].subTables.forEach((subTable, index) => {
+                this.tables[tableId].subTables[index].prop = subTable.prop || subTable.id;
+            });
+        }
     });
 
     this.insert = (tableId, rows, cb) => {
@@ -46,7 +53,7 @@ module.exports = function DB({ tables, db }) {
         });
     };
 
-    this.update = (tableId, config, cb) => {
+    this.updateBulk = (tableId, config, cb) => {
         let queries = getSimpleUpdateQuery(this, tableId, config);
         U.naiveWrapper(true, this, queries, cb);
     };
@@ -96,7 +103,14 @@ module.exports = function DB({ tables, db }) {
     };
 
     this.query = (query, cb) => {
+        this.queryLog.push(query);
         this.pool.query(query, cb);
+    };
+
+    this.queryLog = [];
+
+    this.clearQueryLog = () => {
+        this.queryLog = [];
     };
 
     return this;

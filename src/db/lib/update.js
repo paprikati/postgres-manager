@@ -4,6 +4,7 @@ const U = require('../utils');
 const { deleteById } = require('./delete.js');
 const { insert } = require('./insert.js');
 
+
 // just handles updating a single table - no subtables
 const getSimpleUpdateQuery = (db, tableId, config) => {
     const { data, strict, columns, _filter } = config;
@@ -62,28 +63,12 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
     return mainQuery;
 };
 
-const updateById = (db, tableId, data, callback) => {
-    // run the updatequery for main table
-
-    const { pool, tables } = db;
-    const tableConfig = tables[tableId];
-    const keyProp = tableConfig.key;
-
-    if (!data[keyProp]) {
-        callback(
-            `Please ensure that the data has a value for table key property ${keyProp}`
-        );
-        return;
-    }
-
-    // use addIds and inherits function to get all the ids created
-    data = U.addIdsAndInherits(db, tableId, data);
-
-    const id = data[keyProp];
-    const _filter = { [keyProp]: id };
+// INTERNAL ONLY ()
+const updateOne = (db, tableId, _filter, id, data, callback) => {
+    const tableConfig = db.tables[tableId];
     const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
 
-    pool.query(query, (err, resp) => {
+    db.query(query, (err, resp) => {
         if (err) {
             callback(err);
             return;
@@ -95,16 +80,22 @@ const updateById = (db, tableId, data, callback) => {
             if (tableConfig.subTables) {
                 tableConfig.subTables.forEach(subTable => {
                     // only do something if its on the data
-                    if (data[subTable.id]) {
+                    if (data[subTable.prop]) {
+
                         _tasks.push(c1 => {
-                            updateSubTable(
-                                subTable,
-                                id,
-                                data[subTable.id],
-                                db,
-                                c1
-                            );
+                            if (subTable.oneToOne){
+                                updateOne(db, subTable.id, { [subTable.parentid]: id }, id, data[subTable.prop], c1);
+                            } else {
+                                updateSubTable(
+                                    subTable,
+                                    id,
+                                    data[subTable.prop],
+                                    db,
+                                    c1
+                                );
+                            }
                         });
+
                     }
                 });
             }
@@ -120,7 +111,28 @@ const updateById = (db, tableId, data, callback) => {
                 }
             });
         }
+
     });
+};
+
+const updateById = (db, tableId, data, callback) => {
+    const { tables } = db;
+    const tableConfig = tables[tableId];
+    const keyProp = tableConfig.key;
+
+    if (!data[keyProp]) {
+        callback(
+            `Please ensure that the data has a value for table key property ${keyProp}`
+        );
+        return;
+    }
+
+    // use addIds and inherits function to get all the ids created
+    data = U.addIdsAndInherits(db, tableId, data);
+
+    const id = data[keyProp];
+    const _filter = { [keyProp]: id };
+    updateOne(db, tableId, _filter, id, data, callback);
 };
 
 const bulkUpdateById = (db, tableId, rows, cb) => {
@@ -134,7 +146,7 @@ const bulkUpdateById = (db, tableId, rows, cb) => {
 };
 
 const updateSubTable = (subTable, id, newRows, db, cb) => {
-    const { pool, tables } = db;
+    const { tables } = db;
     const tableConfig = tables[subTable.id];
     const keyProp = tableConfig.key;
 
@@ -147,6 +159,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
                 newRows
             );
 
+            // TODO: can we remove this?
             toCreate = toCreate.map(ea => {
                 ea[subTable.parentid] = id;
                 return ea;
@@ -205,7 +218,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
             id
         );
 
-        pool.query(query, (error, results) => {
+        db.query(query, (error, results) => {
             if (error) {
                 c(error);
             } else {

@@ -1,0 +1,1 @@
+UPDATE people SET name = 'Jane Doe' WHERE id = $1

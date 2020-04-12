@@ -1,0 +1,1 @@
+SELECT id from grandparents WHERE id = $1
