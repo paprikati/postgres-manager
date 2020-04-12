@@ -1,6 +1,6 @@
 {
     "name": "postgres-manager",
-    "version": "0.0.8",
+    "version": "0.1.0",
     "description": "creates and manages a pg database",
     "main": "./src/index.js",
     "scripts": {
