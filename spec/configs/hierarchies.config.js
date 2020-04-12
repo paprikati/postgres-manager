@@ -24,14 +24,14 @@ module.exports = {
                 id: 'children',
                 inherits: ['grandparent_id'],
                 parentid: 'parent_id'
+            },
+            {
+                id: 'homes',
+                prop: 'home',
+                inherits: ['grandparent_id'],
+                parentid: 'parent_id',
+                oneToOne: true
             }
-            // {
-            //     id: 'homes',
-            //     prop: 'home',
-            //     inherits: ['grandparent_id'],
-            //     parent_id: 'parent_id',
-            //     one_to_one: true
-            // }
         ]
     },
     children: {
@@ -42,14 +42,14 @@ module.exports = {
             name: H.str(50)
 
         }
+    },
+    homes: {
+        columns: {
+            id: H.uuidKey(),
+            parent_id: H.uuid(),
+            grandparent_id: H.uuid(),
+            name: H.str(50)
+        }
     }
-    // homes: {
-    //     columns: {
-    //         id: H.uuidKey(),
-    //         parent_id: H.uuid(),
-    //         grandparent_id: H.uuid(),
-    //         name: H.str(50)
-    //     }
-    // }
 };
 

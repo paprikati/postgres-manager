@@ -36,7 +36,7 @@ const retrieve = (db, config, callback) => {
                 // check if we need any of the subcolumns of this table
                 if (tableConfig.subTables && !config.shallow) {
                     relevantSubTables = tableConfig.subTables.filter(
-                        subTable => !columns || columns.includes(subTable.id)
+                        subTable => !columns || columns.includes(subTable.prop)
                     );
                 }
 
@@ -67,7 +67,7 @@ const retrieve = (db, config, callback) => {
 
                         let retrieveOpts = {
                             tableId: subTable.id,
-                            filter: subFilterString,
+                            _filter: subFilterString,
                             columns: retrieveColumns,
                             subColumns: config.subColumns
                         }; // include subColumns incase you have nested subtables
@@ -86,11 +86,15 @@ const retrieve = (db, config, callback) => {
 
                                     // add the data to 'outputData'
                                     outputData.forEach(row => {
-                                        let theseSubRows =
-                                            groupedRows[row[tableConfig.key]] ||
-                                            [];
-                                        row[subTable.id] = theseSubRows;
+                                        let theseSubRows = groupedRows[row[tableConfig.key]] || [];
+                                        if (subTable.oneToOne){
+                                            row[subTable.prop] = theseSubRows[0] || null;
+                                        } else {
+                                            row[subTable.prop] = theseSubRows;
+                                        }
                                     });
+
+
                                 }
                                 c1();
                             }

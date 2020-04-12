@@ -1,0 +1,1 @@
+INSERT INTO people (id, name) VALUES ($1, 'John Doe') ON CONFLICT DO NOTHING

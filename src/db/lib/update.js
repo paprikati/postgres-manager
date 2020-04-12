@@ -4,6 +4,7 @@ const U = require('../utils');
 const { deleteById } = require('./delete.js');
 const { insert } = require('./insert.js');
 
+
 // just handles updating a single table - no subtables
 const getSimpleUpdateQuery = (db, tableId, config) => {
     const { data, strict, columns, _filter } = config;
@@ -62,9 +63,59 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
     return mainQuery;
 };
 
-const updateById = (db, tableId, data, callback) => {
-    // run the updatequery for main table
+// INTERNAL ONLY ()
+const updateOne = (db, tableId, _filter, id, data, callback) => {
+    const tableConfig = db.tables[tableId];
+    const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
 
+    db.query(query, (err, resp) => {
+        if (err) {
+            callback(err);
+            return;
+        } else if (resp.rowCount === 0) {
+            callback('MISSING_RESOURCE');
+        } else {
+            let _tasks = [];
+            // then loop through subTables and see if theres anything there to update
+            if (tableConfig.subTables) {
+                tableConfig.subTables.forEach(subTable => {
+                    // only do something if its on the data
+                    if (data[subTable.prop]) {
+
+                        _tasks.push(c1 => {
+                            if (subTable.oneToOne){
+                                updateOne(db, subTable.id, { [subTable.parentid]: id }, id, data[subTable.prop], c1);
+                            } else {
+                                updateSubTable(
+                                    subTable,
+                                    id,
+                                    data[subTable.prop],
+                                    db,
+                                    c1
+                                );
+                            }
+                        });
+
+                    }
+                });
+            }
+            if (_tasks.length === 0) {
+                callback(null, data);
+                return;
+            }
+            async.parallel(_tasks, e => {
+                if (e) {
+                    callback(e);
+                } else {
+                    callback(null, data);
+                }
+            });
+        }
+
+    });
+};
+
+const updateById = (db, tableId, data, callback) => {
     const { tables } = db;
     const tableConfig = tables[tableId];
     const keyProp = tableConfig.key;
@@ -81,46 +132,7 @@ const updateById = (db, tableId, data, callback) => {
 
     const id = data[keyProp];
     const _filter = { [keyProp]: id };
-    const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
-
-    db.query(query, (err, resp) => {
-        if (err) {
-            callback(err);
-            return;
-        } else if (resp.rowCount === 0) {
-            callback('MISSING_RESOURCE');
-        } else {
-            let _tasks = [];
-            // then loop through subTables and see if theres anything there to update
-            if (tableConfig.subTables) {
-                tableConfig.subTables.forEach(subTable => {
-                    // only do something if its on the data
-                    if (data[subTable.id]) {
-                        _tasks.push(c1 => {
-                            updateSubTable(
-                                subTable,
-                                id,
-                                data[subTable.id],
-                                db,
-                                c1
-                            );
-                        });
-                    }
-                });
-            }
-            if (_tasks.length === 0) {
-                callback(null, data);
-                return;
-            }
-            async.parallel(_tasks, e => {
-                if (e) {
-                    callback(e);
-                } else {
-                    callback(null, data);
-                }
-            });
-        }
-    });
+    updateOne(db, tableId, _filter, id, data, callback);
 };
 
 const bulkUpdateById = (db, tableId, rows, cb) => {
@@ -147,6 +159,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
                 newRows
             );
 
+            // TODO: can we remove this?
             toCreate = toCreate.map(ea => {
                 ea[subTable.parentid] = id;
                 return ea;

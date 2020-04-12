@@ -229,6 +229,7 @@ const addIdsAndInherits = (db, tableId, rows, inherits) => {
         rows = [rows];
         backToObj = true;
     }
+
     const tableConfig = db.tables[tableId];
     const keyProp = tableConfig.key;
 
@@ -254,10 +255,10 @@ const addIdsAndInherits = (db, tableId, rows, inherits) => {
                         _inherits[prop] = row[prop];
                     });
                 }
-                row[subTable.id] = addIdsAndInherits(
+                row[subTable.prop] = addIdsAndInherits(
                     db,
                     subTable.id,
-                    row[subTable.id],
+                    row[subTable.prop],
                     _inherits
                 );
                 return row;
