@@ -1,2 +1,2 @@
-SELECT id from people WHERE id IN ($1)
-DELETE FROM people WHERE id IN ($1)
+SELECT id from people WHERE id IN ($1,$2)
+DELETE FROM people WHERE id IN ($1,$2)

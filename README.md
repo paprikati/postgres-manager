@@ -95,10 +95,13 @@ Supports a `prep` function to apply to the data before it is returned
 db.insertAndPrep('people', [{id:1, name:'A'}], data => data[0], cb)
 ```
 
-### `db.update`
+### `db.updateBulk`
+
+This runs a bulk update, but only ever on a single table. If you want to update an object
+and its children, then use `updateById`.
 
 ```js
-db.update('mytable',{_filter:{id:123}, data:{newCol:'newVal'}}, cb)
+db.updateBulk('mytable',{_filter:{id:123}, data:{newCol:'newVal'}}, cb)
 ```
 Options:
 

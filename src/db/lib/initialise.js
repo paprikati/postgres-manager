@@ -31,12 +31,12 @@ module.exports = function(db, callback) {
         }
     });
 
+
     let finalSQL = sqlArray.join('\n\n');
 
-    const fs = require('fs');
-    fs.writeFileSync('./structure.sql', finalSQL);
-
-    db.query(finalSQL, callback);
+    db.query(finalSQL, err => {
+        callback(finalSQL, err);
+    });
 };
 
 function getSqlType(config) {

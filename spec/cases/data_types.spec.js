@@ -13,6 +13,7 @@ const seedData = [
         float: 1.4,
         int: -4,
         str: 'str',
+        date: '2020-01-01',
         uuid: uuid()
     }
 ];
@@ -28,6 +29,18 @@ describe('Data Types', function() {
             db.insert('data_types', seedData, done);
         });
     });
+
+    afterAll(done => db.drop(done));
+
+    H.itIssuesCorrectSql(done => {
+        db.drop(() => {
+            db.clearQueryLog();
+            db.initialise(done);
+        });
+    },
+    'data_types/initialise-db',
+    db
+    );
 
     it('can insert an object', function(done) {
         const testRow = { id: uuid(), mandatory: 'hello world' };
@@ -81,6 +94,23 @@ describe('Data Types', function() {
         it('validates max', function(done){
             db.insert('data_types', { id: uuid(), int: 6 }, err => {
                 expect(err.message).toBe('6 exceeds max limit 5');
+                done();
+            });
+        });
+    });
+
+    describe('dates', function(){
+
+        it('validates type', function(done){
+            db.insert('data_types', { id: uuid(), mandatory: 'hi', date: false }, err => {
+                expect(err.message).toBe('false is not a valid date for column date');
+                done();
+            });
+        });
+
+        it('validates type', function(done){
+            db.insert('data_types', { id: uuid(), mandatory: 'hi', date: '2020-23-23' }, err => {
+                expect(err.message).toBe('2020-23-23 is not a valid date for column date');
                 done();
             });
         });

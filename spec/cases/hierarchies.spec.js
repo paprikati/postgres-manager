@@ -105,6 +105,17 @@ describe('Hierarchies', function() {
             });
         });
     });
+    afterAll(done => db.drop(done));
+
+    H.itIssuesCorrectSql(done => {
+        db.drop(() => {
+            db.clearQueryLog();
+            db.initialise(done);
+        });
+    },
+    'hierarchies/initialise-db',
+    db
+    );
 
     describe('insert', function() {
         H.itIssuesCorrectSql(done =>

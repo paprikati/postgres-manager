@@ -4,6 +4,7 @@ const PG = require('../../src');
 function initialiseDB(tables, callback){
     const db = getDB(tables);
     db.drop(() => {
+        db.clearQueryLog();
         db.initialise(callback);
     });
 }
@@ -49,7 +50,7 @@ function itIssuesCorrectSql(toPrepare, key, db){
 }
 
 function cleanSql(sql){
-    var guidRegex = /'([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'/ig;
+    var guidRegex = /.([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})./ig;
 
     for (let i = 1; i < 1000; i++){
         let guidToReplaceArr = sql.match(guidRegex);
@@ -57,7 +58,7 @@ function cleanSql(sql){
             break;
         }
         let guid = guidToReplaceArr[0];
-        let regex = new RegExp(guid, 'g');
+        let regex = new RegExp(`.${guid.substr(1).slice(0, -1)}.`, 'g');
 
         sql = sql.replace(regex, `$${i}`);
     }

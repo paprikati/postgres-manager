@@ -10,6 +10,7 @@ module.exports = {
             float: H.floatBetween(-5, 5),
             uuid: H.uuid(),
             mandatory: H.str(50, true, true),
+            date: H.date(),
             uneditable: H.str(50, false)
         }
     }
