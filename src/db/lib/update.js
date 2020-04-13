@@ -63,9 +63,10 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
     return mainQuery;
 };
 
-const updateOne = (db, tableId, _filter, id, data, shallow, callback) => {
+const updateOne = (db, tableId, _filter, data, shallow, callback) => {
     const tableConfig = db.tables[tableId];
     const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
+    const thisItemId = data[tableConfig.key];
 
     db.query(query, (err, resp) => {
         if (err) {
@@ -81,14 +82,14 @@ const updateOne = (db, tableId, _filter, id, data, shallow, callback) => {
                 tableConfig.subTables.forEach(subTable => {
                     // only do something if its on the data
                     if (data[subTable.prop]) {
-
                         _tasks.push(c1 => {
                             if (subTable.oneToOne){
-                                updateOne(db, subTable.id, { [subTable.parentid]: id }, id, data[subTable.prop], null, c1);
+
+                                updateOne(db, subTable.id, { [subTable.parentid]: thisItemId }, data[subTable.prop], null, c1);
                             } else {
                                 updateSubTable(
                                     subTable,
-                                    id,
+                                    thisItemId,
                                     data[subTable.prop],
                                     db,
                                     c1
@@ -103,7 +104,8 @@ const updateOne = (db, tableId, _filter, id, data, shallow, callback) => {
                 callback(null, data);
                 return;
             }
-            async.parallel(_tasks, e => {
+            // TODO: make parallel and have verify-sql tests work
+            async.series(_tasks, e => {
                 if (e) {
                     callback(e);
                 } else {
@@ -130,9 +132,8 @@ const updateById = (db, tableId, data, shallow, callback) => {
     // use addIds and inherits function to get all the ids created
     data = U.addIdsAndInherits(db, tableId, data);
 
-    const id = data[keyProp];
-    const _filter = { [keyProp]: id };
-    return updateOne(db, tableId, _filter, id, data, shallow, callback);
+    const _filter = { [keyProp]: data[keyProp] };
+    return updateOne(db, tableId, _filter, data, shallow, callback);
 };
 
 const bulkUpdateById = (db, tableId, rows, shallow, cb) => {
@@ -205,7 +206,8 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
                 }
             };
 
-            async.parallel(_tasks, callback);
+            // TODO: make this parallel once we can get verfiy-sql working
+            async.series(_tasks, callback);
         }
     });
 

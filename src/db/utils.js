@@ -213,7 +213,8 @@ const naiveWrapper = (parallel, db, queries, cb) => {
             };
         });
         if (parallel) {
-            async.parallel(_tasks, cb);
+            // TODO: make parallel and have verify-sql tests work
+            async.series(_tasks, cb);
         } else {
             async.waterfall(_tasks, cb);
         }

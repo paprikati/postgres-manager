@@ -21,6 +21,17 @@ function getDB(tables){
     return PG.connect({ tables, db: dbConf });
 }
 
+function reviewSql(db, key){
+    let rawSql = db.queryLog.join('\n');
+    let receivedSql = cleanSql(rawSql);
+
+    // find if there's a sql file
+    let filePath = `${__dirname}/../fixtures/sql/${key}`;
+    let toReviewPath = `${filePath}.review.sql`;
+    fs.ensureFileSync(toReviewPath);
+    fs.writeFileSync(toReviewPath, receivedSql, 'utf8');
+}
+
 function itIssuesCorrectSql(toPrepare, key, db){
     it(key + ': issues correct sql', function(done) {
         db.clearQueryLog();
@@ -41,7 +52,7 @@ function itIssuesCorrectSql(toPrepare, key, db){
                 expect(approvedSql).toEqual(receivedSql);
                 done();
             } else {
-                fs.ensureFileSync(approvedPath, receivedSql, 'utf8');
+                fs.ensureFileSync(approvedPath);
                 fs.writeFileSync(approvedPath, receivedSql, 'utf8');
                 done();
             }
@@ -65,8 +76,10 @@ function cleanSql(sql){
     return sql.trim();
 }
 
+
 module.exports = {
     initialiseDB,
     getDB,
+    reviewSql,
     itIssuesCorrectSql
 };
