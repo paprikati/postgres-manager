@@ -1,0 +1,1 @@
+UPDATE grandparents SET name = 'Granny Weatherwax' WHERE id = $1

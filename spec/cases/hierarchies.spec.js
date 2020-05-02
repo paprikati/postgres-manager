@@ -24,7 +24,17 @@ const seedData = [{
             ],
             home: {
                 id: uuid(),
-                name: 'Home 0'
+                name: 'Home 0',
+                rooms: [
+                    {
+                        id: uuid(),
+                        name: 'Room 0-0'
+                    },
+                    {
+                        id: uuid(),
+                        name: 'Room 0-1'
+                    }
+                ]
             }
         },
         {
@@ -42,7 +52,8 @@ const seedData = [{
             ],
             home: {
                 id: uuid(),
-                name: 'Home 1'
+                name: 'Home 1',
+                rooms: []
             }
         }
     ]
@@ -67,7 +78,8 @@ const seedData2 = [{
             ],
             home: {
                 id: uuid(),
-                name: 'XHome 0'
+                name: 'XHome 0',
+                rooms: []
             }
         },
         {
@@ -85,7 +97,8 @@ const seedData2 = [{
             ],
             home: {
                 id: uuid(),
-                name: 'XHome 1'
+                name: 'XHome 1',
+                rooms: []
             }
         }
     ]
@@ -168,17 +181,33 @@ describe('Hierarchies', function() {
                     db.getById('grandparents', { id: seedId }, (err, res) => {
                         expect(res.parents[0].children[0].name).toEqual('New Child Name');
                         expect(res.parents[0].home.name).toEqual('New Home Name');
+                        H.reviewSql(db, 'hierarchies/update-deep');
+                        done();
+                    });
+                });
+            });
+        });
+
+        describe('update shallow', function(){
+            const updateData = _.cloneDeep(seedData[0]);
+            updateData.name = 'Granny Weatherwax';
+            updateData.parents[0].children[0].name = 'New Child Name';
+
+            it('#updates shallow', function(done) {
+                db.updateByIdShallow('grandparents', updateData, () => {
+                    db.getById('grandparents', { id: seedId }, (err, res) => {
+                        expect(res.name).toEqual('Granny Weatherwax');
+                        expect(res.parents[0].children[0].name).toEqual('Child 0-0');
                         done();
                     });
                 });
             });
 
-            H.itIssuesCorrectSql(done => db.updateById('grandparents', deepUpdateData, done),
-                'hierarchies/update-deep',
+            H.itIssuesCorrectSql(done => db.updateByIdShallow('grandparents', updateData, done),
+                'hierarchies/update-shallow',
                 db
             );
         });
-
     });
 
     describe('retrieve', function() {

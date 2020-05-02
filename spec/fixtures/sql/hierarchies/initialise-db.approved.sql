@@ -22,3 +22,11 @@ CREATE TABLE homes (
     "grandparent_id" uuid,
     "name" varchar(50)
 );
+
+CREATE TABLE rooms (
+    "id" uuid PRIMARY KEY UNIQUE NOT NULL,
+    "home_id" uuid,
+    "parent_id" uuid,
+    "grandparent_id" uuid,
+    "name" varchar(50)
+);

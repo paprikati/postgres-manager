@@ -115,8 +115,17 @@ Note - updates run in parallel, so don't return a response object
 #### `db.updateById`
 
 ```js
-db.update('mytable',{newCol:'newVal', id:123}, cb);
+db.updateById('mytable',{newCol:'newVal', id:123}, cb);
 ```
+
+#### `db.updateByIdShallow`
+
+Ignores any subtables
+
+```js
+db.updateByIdShallow('mytable',{newCol:'newVal', id:123}, cb);
+```
+
 
 ### `db.get` OR `db.retrieve`
 

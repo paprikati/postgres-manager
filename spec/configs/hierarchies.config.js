@@ -49,6 +49,22 @@ module.exports = {
             parent_id: H.uuid(),
             grandparent_id: H.uuid(),
             name: H.str(50)
+        },
+        subTables: [
+            {
+                id: 'rooms',
+                inherits: ['grandparent_id', 'parent_id'],
+                parentid: 'home_id'
+            }
+        ]
+    },
+    rooms: {
+        columns: {
+            id: H.uuidKey(),
+            home_id: H.uuid(),
+            parent_id: H.uuid(),
+            grandparent_id: H.uuid(),
+            name: H.str(50)
         }
     }
 };

@@ -63,10 +63,10 @@ const getSimpleUpdateQuery = (db, tableId, config) => {
     return mainQuery;
 };
 
-// INTERNAL ONLY ()
-const updateOne = (db, tableId, _filter, id, data, callback) => {
+const updateOne = (db, tableId, _filter, data, shallow, callback) => {
     const tableConfig = db.tables[tableId];
     const query = getSimpleUpdateQuery(db, tableId, { data, _filter });
+    const thisItemId = data[tableConfig.key];
 
     db.query(query, (err, resp) => {
         if (err) {
@@ -74,21 +74,22 @@ const updateOne = (db, tableId, _filter, id, data, callback) => {
             return;
         } else if (resp.rowCount === 0) {
             callback('MISSING_RESOURCE');
+            return;
         } else {
             let _tasks = [];
             // then loop through subTables and see if theres anything there to update
-            if (tableConfig.subTables) {
+            if (tableConfig.subTables && !shallow) {
                 tableConfig.subTables.forEach(subTable => {
                     // only do something if its on the data
                     if (data[subTable.prop]) {
-
                         _tasks.push(c1 => {
                             if (subTable.oneToOne){
-                                updateOne(db, subTable.id, { [subTable.parentid]: id }, id, data[subTable.prop], c1);
+
+                                updateOne(db, subTable.id, { [subTable.parentid]: thisItemId }, data[subTable.prop], null, c1);
                             } else {
                                 updateSubTable(
                                     subTable,
-                                    id,
+                                    thisItemId,
                                     data[subTable.prop],
                                     db,
                                     c1
@@ -103,19 +104,20 @@ const updateOne = (db, tableId, _filter, id, data, callback) => {
                 callback(null, data);
                 return;
             }
-            async.parallel(_tasks, e => {
+            // TODO: make parallel and have verify-sql tests work
+            async.series(_tasks, e => {
                 if (e) {
                     callback(e);
                 } else {
                     callback(null, data);
                 }
             });
-        }
 
+        }
     });
 };
 
-const updateById = (db, tableId, data, callback) => {
+const updateById = (db, tableId, data, shallow, callback) => {
     const { tables } = db;
     const tableConfig = tables[tableId];
     const keyProp = tableConfig.key;
@@ -130,16 +132,15 @@ const updateById = (db, tableId, data, callback) => {
     // use addIds and inherits function to get all the ids created
     data = U.addIdsAndInherits(db, tableId, data);
 
-    const id = data[keyProp];
-    const _filter = { [keyProp]: id };
-    updateOne(db, tableId, _filter, id, data, callback);
+    const _filter = { [keyProp]: data[keyProp] };
+    return updateOne(db, tableId, _filter, data, shallow, callback);
 };
 
-const bulkUpdateById = (db, tableId, rows, cb) => {
+const bulkUpdateById = (db, tableId, rows, shallow, cb) => {
     async.each(
         rows,
         (row, c1) => {
-            updateById(db, tableId, row, c1);
+            updateById(db, tableId, row,  shallow, c1);
         },
         cb
     );
@@ -175,7 +176,7 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
                 },
                 function(c) {
                     if (toUpdate.length > 0) {
-                        bulkUpdateById(db, subTable.id, toUpdate, c);
+                        bulkUpdateById(db, subTable.id, toUpdate, false, c);
                     } else {
                         c();
                     }
@@ -205,7 +206,8 @@ const updateSubTable = (subTable, id, newRows, db, cb) => {
                 }
             };
 
-            async.parallel(_tasks, callback);
+            // TODO: make this parallel once we can get verfiy-sql working
+            async.series(_tasks, callback);
         }
     });
 
