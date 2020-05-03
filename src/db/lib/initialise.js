@@ -35,7 +35,7 @@ module.exports = function(db, callback) {
     let finalSQL = sqlArray.join('\n\n');
 
     db.query(finalSQL, err => {
-        callback(finalSQL, err);
+        callback(err, finalSQL);
     });
 };
 
