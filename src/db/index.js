@@ -1,7 +1,7 @@
 const { Pool, types } = require('pg');
 const U = require('./utils');
 
-const initialise = require('./lib/initialise');
+const { initialise, getSchema } = require('./lib/initialise');
 const reset = require('./lib/reset');
 const drop = require('./lib/drop');
 const { insert } = require('./lib/insert');
@@ -10,7 +10,6 @@ const { updateById, getSimpleUpdateQuery, bulkUpdateById } = require('./lib/upda
 const { _delete, deleteById } = require('./lib/delete');
 
 module.exports = function DB({ tables, db }) {
-    this.pool = new Pool(db);
 
     // make dates return a js date object
     var DATATYPE_DATE = 1082;
@@ -107,6 +106,10 @@ module.exports = function DB({ tables, db }) {
         initialise(this, cb);
     };
 
+    this.getSchema = () => {
+        getSchema(this);
+    };
+
     this.reset = cb => {
         reset(this, cb);
     };
@@ -116,8 +119,12 @@ module.exports = function DB({ tables, db }) {
     };
 
     this.query = (query, cb) => {
+        let pool = new Pool(db);
         this.queryLog.push(query);
-        this.pool.query(query, cb);
+        pool.query(query, (err, res) => {
+            pool.end();
+            cb(err, res);
+        });
     };
 
     this.queryLog = [];
